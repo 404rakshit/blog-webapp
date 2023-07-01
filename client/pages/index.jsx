@@ -5,16 +5,18 @@ import Image from "next/image";
 
 export async function getStaticProps(ctx) {
 
-  const data = await fetch("http://192.168.46.125:8080/article").then(res => res.json())
+  const data = await fetch("http://192.168.133.125:8080/article").then(res => res.json())
+  const people = await fetch("http://192.168.133.125:8080/user?limit=3").then(res => res.json())
 
   return {
     props: {
-      data
+      data,
+      people
     }
   }
 }
 
-export default function Home({ data }) {
+export default function Home({ data, people }) {
   return (
     <>
       <Head>
@@ -28,14 +30,16 @@ export default function Home({ data }) {
 
           <div className="flex max-xl:flex-col items-start gap-8 max-xl:w-full">
 
-            <span onClick={() => {
+            <form onClick={() => {
               document.querySelector('input').focus()
+            }} onSubmit={(e)=>{
+              e.preventDefault()
             }} className="flex max-xl:w-full max-xl:px-4 items-center group hover:border-zinc-400 focus-within:border-zinc-400 transition-all duration-300 justify-start rounded-full py-2 px-3 border cursor-text">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 stroke-zinc-400 transition-all duration-300 group-hover:scale-110 group-focus-within:scale-110">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
               <input type="text" placeholder="Search..." className="outline-none px-2 mr-5 w-60 placeholder:text-zinc-400 xl:text-sm text-lg" />
-            </span>
+            </form>
 
             <section className="flex flex-wrap justify-around items-center gap-3 max-xl:w-full">
               {/* <label className={`${jose.className} text-zinc-500`}>My topics:</label> */}
@@ -56,13 +60,13 @@ export default function Home({ data }) {
           </section>
 
           {data?.map(e => {
-            return(<Article data={e} />)
+            return (<Article data={e} />)
           })}
 
         </div>
 
         {/* Right Hand Side */}
-        <div className="lg:border-l py-9 xl:pl-9 h-screen xl:mr-0 xl:ml-auto">
+        <div className="xl:border-l xl:py-9 xl:pl-9 min-h-screen xl:mr-0 xl:ml-auto flex flex-col gap-10">
 
           <div className="flex justify-between gap-1 bg-zinc-100 p-7 rounded-2xl overflow-hidden">
             <span className="flex flex-col items-start gap-3 justify-between">
@@ -73,6 +77,33 @@ export default function Home({ data }) {
               <button className={`${jose.className} mt-2 text-sm rounded-lg p-3 px-6 xl:hover:bg-zinc-300 transition-color duration-200 bg-zinc-200`}>Get Unlimited access</button>
             </span>
             <Image src={"/pad.png"} height={116} width={101} className=" scale-75" />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <label className={`${jose.className} text-2xl my-2`}>People you might be interested</label>
+
+            {people ? people.map(e => {
+              return (<section key={e._id} className="flex items-center justify-between">
+
+                <span className="flex flex-shrink gap-2">
+                  <Image loader={() => e.profile} src={e.profile} className="rounded-full object-cover" width={55} height={55} />
+
+                  <section className="flex justify-center flex-col p-1">
+                    <span className={`${jose.className} flex text-lg leading-5`}>{e.name}</span>
+                    <span className="text-zinc-400 text-xs leading-none">{e.designation} at {e.company || ""}</span>
+                  </section>
+                </span>
+
+                <span className={` ${jose.className} h-fit flex gap-1 items-center rounded-full border px-5 py-3 text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-100 font-medium leading-3`}>Follow</span>
+
+              </section>)
+            }) : <></>}
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <label className={`${jose.className} text-2xl my-2`}>My reading list</label>
+            
+            {}
           </div>
 
         </div>

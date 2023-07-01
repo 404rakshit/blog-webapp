@@ -2,8 +2,23 @@ const express = require("express");
 const User = require("../../models/user");
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.send("Hello User");
+router.get("/", async (req, res) => {
+  try {
+    const limit = req.query.limit;
+    const users = limit ? await User.find().limit(limit) : await User.find();
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(404).send(err);
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(404).send(err);
+  }
 });
 
 router.post("/", async (req, res) => {
@@ -18,7 +33,7 @@ router.post("/", async (req, res) => {
       about: req.body.about,
     });
     const data = await user.save();
-    res.cookie("userId", user._id.toString() , {
+    res.cookie("userId", user._id.toString(), {
       expires: new Date(Date.now() + 900000),
       httpOnly: true,
       secure: true,

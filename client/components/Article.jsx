@@ -28,7 +28,7 @@ export default function Article({ data }) {
             <section className="flex max-xl:flex-col-reverse gap-3 items-start justify-between">
                 <div className="flex flex-col py-3 gap-2 w-full">
                     {data?.title ? <h3 className={`${jose.className} text-2xl leading-6`}>{data.title}</h3> : <span className="h-10 w-96 animate-pulse bg-zinc-100 rounded-md"></span>}
-                    {data?.description ? <p className="text-zinc-400 text-sm">{data.description}</p> : <><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span></>}
+                    {data?.description ? <p className="text-zinc-400 text-sm line-clamp-3">{data.description}</p> : <><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span></>}
                 </div>
 
                 {data?.cover ? <Image loader={() => data.cover} src={data.cover} width={270} height={180} className="rounded-lg object-cover max-xl:w-full " /> : <div className="h-40 w-72 max-xl:w-full max-xl:h-80 bg-zinc-100 rounded-lg animate-pulse"></div>}
