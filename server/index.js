@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 8080;
 
 const userRoute = require("./routes/user")
 const articleRoute = require("./routes/article")
+const loginRoute = require("./routes/login")
+const signupRoute = require("./routes/signup")
+const logoutRoute = require("./routes/logout")
 
 Mongoose.connect(process.env.db_url);
 const db = Mongoose.connection;
@@ -21,6 +24,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/user',userRoute)
 app.use('/article',articleRoute)
+app.use('/login',loginRoute)
+app.use('/signup',signupRoute)
+app.use('/logout',logoutRoute)
 
 app.use(cors({
     origin: "http://localhost:3000",

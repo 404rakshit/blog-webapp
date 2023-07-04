@@ -15,12 +15,24 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Username is required"],
       unique: true,
+      validate: {
+        validator: (username) => username.length > 2,
+        message: "{VALUE} is too short to be a username",
+      },
     },
     email: {
       type: String,
       required: [true, "Email is required"],
       unique: true,
-      lowercase: true
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      validate: {
+        validator: (password) => password.length > 7,
+        message: "{VALUE} is too short to be a password",
+      },
     },
     profile: {
       type: String,
