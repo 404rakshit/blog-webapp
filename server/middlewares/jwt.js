@@ -11,7 +11,7 @@ const crypto = require("crypto");
 // console.log(token);
 
 exports.generateAccessToken = generateAccessToken = (payload) => {
-  return jwt.sign(payload, process.env.accessToken, { expiresIn: "15m" });
+  return jwt.sign(payload, process.env.accessToken, { expiresIn: "1h" });
 };
 
 exports.generateRefreshToken = (payload) => {
@@ -32,11 +32,24 @@ exports.verifyToken = (req, res, next) => {
     if (!token) throw { status: 401, message: "Token Missing" };
 
     jwt.verify(token, process.env.accessToken, (err, user) => {
-      if (err) throw { status: 403, message: "Token Unrecognized" };
+      if (err) throw { status: 403, message: "Token Expired!" };
       req.user = user;
       next();
     });
   } catch (err) {
     res.status(err.status || 500).json(err.message);
   }
+};
+
+exports.generateMailToken = (payload) => {
+  return jwt.sign(payload, process.env.mailToken, {expiresIn: "15m"});
+};
+
+exports.verifyMailToken = (token) => {
+  let data;
+  jwt.verify(token, process.env.mailToken, (err, user) => {
+    if (err) throw { status: 403, message: "Token Expired!" };
+    data = user
+  });
+  return data
 };

@@ -20,7 +20,7 @@ export default function Home({ data, people }) {
   return (
     <>
       <Head>
-        <title>Homepage</title>
+        <title>Reader - A place for ideas and wisdom</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <main className={`flex max-xl:flex-col  xl:items-start min-h-[90svh] px-4 xl:px-16`}>

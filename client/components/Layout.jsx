@@ -4,9 +4,11 @@ import Header from "./Header";
 
 export default function Layout({ children }) {
     return (
-        <div className={`${poppins.className}`}>
+        <div className={`${poppins.className} `}>
             <Header />
-            {children}
+            <div className="max-w-[2000px] mx-auto">
+                {children}
+            </div>
             <Footer />
         </div>
     );

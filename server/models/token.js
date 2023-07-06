@@ -5,8 +5,12 @@ const tokenSchema = new Schema(
   {
     refreshToken: {
       type: String,
-      required: [true, "Token is required"],
-    }
+      // required: [true, "Token is required"],
+    },
+    mailToken: {
+      type: String,
+      // required: [true, "Token is required"],
+    },
   },
   { versionKey: false, timestamps: true }
 );
