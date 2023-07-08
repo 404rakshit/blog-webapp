@@ -33,15 +33,9 @@ router.post("/", async (req, res) => {
       refreshToken: generateRefreshToken({ username: user.username }),
     });
     await token.save();
-    res.cookie("access", generateAccessToken({ username: user.username }), {
-      expires: new Date(Date.now() + 900000),
-      httpOnly: true,
-      secure: true,
-    });
-    res.cookie("refresh", token.refreshToken, {
-      httpOnly: true,
-      secure: true,
-    });
+    req.session.access = generateAccessToken({ username: user.username });
+    req.session.refesh = token.refreshToken;
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
     res.send(data);
   } catch (err) {
     res.status(500).send(err.errors || err);
@@ -51,14 +45,14 @@ router.post("/", async (req, res) => {
 // router.post("/mail", sendTestMail);
 router.post("/mail", async (req, res) => {
   try {
-    let email = req.body.email;
-    if (!email)
-      throw { status: 404, message: "Provide an Emailfor Verification" };
+    const { email } = req.body;
+    if (!email) throw { status: 404, message: "Provide an Email for Verification" };
     const token = new Token({
       mailToken: generateMailToken({ email }),
     });
     let data = await token.save();
-    res.status(201).json(data);
+    let mailReponse = await sendMail(email, data._id)
+    res.status(201).json({message: `Email Sent to ${mailReponse.accepted[0]}`});
   } catch (err) {
     res
       .status(err.status || 500)
@@ -66,18 +60,23 @@ router.post("/mail", async (req, res) => {
   }
 });
 
-router.post("/verify", async (req, res) => {
+// router.post("/mailer",(req,res)=>{
+//   console.log(req.body.email);
+//   res.sendStatus(200)
+// })
+
+router.get("/verify", async (req, res) => {
   try {
     const { token } = req.query;
-    if(!token) throw {status: 404, message: "Provide Token"}
-    let data = await Token.findOne({ mailToken: token });
+    if (!token) throw { status: 404, message: "Provide Token" };
+    let data = await Token.findById(token);
     if (!data) throw { status: 404, message: "Token not found" };
-    let respose = verifyMailToken(data.mailToken)
+    let respose = await verifyMailToken(data.mailToken);
     res.status(201).json(respose);
   } catch (err) {
     res
       .status(err.status || 500)
-      .json(err.message || { message: "Internal Sever Error" });
+      .json({ message: err.message || "Internal Sever Error" });
   }
 });
 

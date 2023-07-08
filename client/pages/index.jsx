@@ -5,8 +5,8 @@ import Image from "next/image";
 
 export async function getStaticProps(ctx) {
 
-  const data = await fetch("http://192.168.133.125:8080/article").then(res => res.json())
-  const people = await fetch("http://192.168.133.125:8080/user?limit=3").then(res => res.json())
+  const data = await fetch("http://192.168.54.125:8080/article").then(res => res.json())
+  const people = await fetch("http://192.168.54.125:8080/user?limit=3").then(res => res.json())
 
   return {
     props: {
@@ -31,14 +31,14 @@ export default function Home({ data, people }) {
           <div className="flex max-xl:flex-col items-start gap-8 max-xl:w-full">
 
             <form onClick={() => {
-              document.querySelector('input').focus()
+              document.querySelector('#input').focus()
             }} onSubmit={(e)=>{
               e.preventDefault()
             }} className="flex max-xl:w-full max-xl:px-4 items-center group hover:border-zinc-400 focus-within:border-zinc-400 transition-all duration-300 justify-start rounded-full py-2 px-3 border cursor-text">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 stroke-zinc-400 transition-all duration-300 group-hover:scale-110 group-focus-within:scale-110">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
-              <input type="text" placeholder="Search..." className="outline-none px-2 mr-5 w-60 placeholder:text-zinc-400 xl:text-sm text-lg" />
+              <input id="input" type="text" autoComplete="off" placeholder="Search..." className="outline-none px-2 mr-5 w-60 placeholder:text-zinc-400 xl:text-sm text-lg" />
             </form>
 
             <section className="flex flex-wrap justify-around items-center gap-3 max-xl:w-full">
@@ -60,7 +60,7 @@ export default function Home({ data, people }) {
           </section>
 
           {data?.map(e => {
-            return (<Article data={e} />)
+            return (<Article key={e._id} data={e} />)
           })}
 
         </div>

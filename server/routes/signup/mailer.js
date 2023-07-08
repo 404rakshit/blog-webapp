@@ -36,65 +36,57 @@ async function sendTestMail(req, res, next) {
   }
 }
 
-async function sendMail(req, res, next) {
-  try {
-    const { userEmail } = req.body;
+async function sendMail(userEmail, token) {
+  let config = {
+    service: "gmail",
+    auth: {
+      user: process.env.Email,
+      pass: process.env.Password,
+    },
+  };
 
-    if (!userEmail) throw { msg: "Provide recivers mail please" };
+  let transporter = nodemailer.createTransport(config);
 
-    let config = {
-      service: "gmail",
-      auth: {
-        user: process.env.Email,
-        pass: process.env.Password,
+  let MailGenerator = new mailGen({
+    theme: "default",
+    product: {
+      name: "READER",
+      link: "#",
+    },
+  });
+
+  let response = {
+    body: {
+    name: 'Reader',
+    intro: 'Welcome to email verification',
+    action: {
+      instructions: 'Please click the button below to verify your account',
+      button: {
+        color: '#33b5e5',
+        text: 'Verify account',
+        link: `http://localhost:8080/signup/verify?token=${token}`,
       },
-    };
+    },
+    outro: "If you did not make this request, you can safely ignore this email."
+  },
+  };
 
-    let transporter = nodemailer.createTransport(config);
+  let mail = MailGenerator.generate(response);
 
-    let MailGenerator = new mailGen({
-      theme: "default",
-      product: {
-        name: "READER",
-        link: "https://mailgen.js/",
-      },
-    });
+  let message = {
+    from: process.env.Email,
+    to: userEmail,
+    subject: "Finish setting up your account",
+    html: mail,
+  };
 
-    let response = {
-      body: {
-        name: "Daily Flipkart",
-        intro: "Your bill has arrived!",
-        table: {
-          data: [
-            {
-              item: "Nodemailer Stack Book",
-              description: "A Backend application",
-              price: "$10.99",
-            },
-          ],
-        },
-        outro: "Looking forward to do more business",
-      },
-    };
-
-    let mail = MailGenerator.generate(response);
-
-    let message = {
-      from: process.env.Email,
-      to: userEmail,
-      subject: "Place Order",
-      html: mail,
-    };
-
-    transporter.sendMail(message).then((info) => {
-      return res.status(201).json({
-        msg: `Mail Sent Successfully to ${userEmail}`,
-        info,
-      });
-    });
-  } catch (err) {
-    return res.status(500).json(err);
-  }
+  return await transporter.sendMail(message);
+  // .then((info) => {
+  //   return res.status(201).json({
+  //     msg: `Mail Sent Successfully to ${userEmail}`,
+  //     info,
+  //   });
+  // });
 }
 
 module.exports = { sendTestMail, sendMail };

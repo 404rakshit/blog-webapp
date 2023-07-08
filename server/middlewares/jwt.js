@@ -2,6 +2,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const crypto = require("crypto");
+const Token = require("../models/token");
 // let token = jwt.sign({ foo: 'bar' }, 'shhhhh');
 
 // let Key = fs.readFileSync("privateKey.key");
@@ -19,9 +20,9 @@ exports.generateRefreshToken = (payload) => {
 };
 
 exports.verifyRefreshToken = (token) => {
-  jwt.verify(token, process.env.refreshToken, (err, user) => {
+  return jwt.verify(token, process.env.refreshToken, (err, user) => {
     if (err) throw { status: 403, message: "Please Login Again" };
-    return generateAccessToken({ username: user.username })
+    return generateAccessToken({ username: user.username });
   });
 };
 
@@ -42,14 +43,15 @@ exports.verifyToken = (req, res, next) => {
 };
 
 exports.generateMailToken = (payload) => {
-  return jwt.sign(payload, process.env.mailToken, {expiresIn: "15m"});
+  return jwt.sign(payload, process.env.mailToken, { expiresIn: "15m" });
 };
 
-exports.verifyMailToken = (token) => {
-  let data;
-  jwt.verify(token, process.env.mailToken, (err, user) => {
-    if (err) throw { status: 403, message: "Token Expired!" };
-    data = user
+exports.verifyMailToken = async (token) => {
+  return jwt.verify(token, process.env.mailToken, async (err, user) => {
+    if (err) {
+      await Token.deleteOne({mailToken: token})
+      throw { status: 403, message: "Token Expired!" }
+    }
+     return user;
   });
-  return data
 };
