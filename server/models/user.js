@@ -15,6 +15,7 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Username is required"],
       unique: true,
+      lowercase: true,
       validate: {
         validator: (username) => username.length > 2,
         message: "{VALUE} is too short to be a username",
@@ -46,6 +47,12 @@ const userSchema = new Schema(
     about: {
       type: String,
     },
+    socials: [
+      {
+        type: String,
+        max: 3
+      }
+    ],
     articles: [
       {
         type: Schema.Types.ObjectId,

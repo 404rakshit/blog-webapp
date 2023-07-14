@@ -5,8 +5,8 @@ import Image from "next/image";
 
 export async function getStaticProps(ctx) {
 
-  const data = await fetch("http://192.168.54.125:8080/article").then(res => res.json())
-  const people = await fetch("http://192.168.54.125:8080/user?limit=3").then(res => res.json())
+  const data = await fetch(`${process.env.SERVER_URL}/article`).then(res => res.json())
+  const people = await fetch(`${process.env.SERVER_URL}/user?limit=3`).then(res => res.json())
 
   return {
     props: {

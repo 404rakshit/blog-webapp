@@ -64,7 +64,7 @@ async function sendMail(userEmail, token) {
       button: {
         color: '#33b5e5',
         text: 'Verify account',
-        link: `http://localhost:8080/signup/verify?token=${token}`,
+        link: `${process.env.CLIENT_URL}/signup?token=${token}`,
       },
     },
     outro: "If you did not make this request, you can safely ignore this email."

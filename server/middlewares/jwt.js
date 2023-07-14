@@ -43,15 +43,27 @@ exports.verifyToken = (req, res, next) => {
 };
 
 exports.generateMailToken = (payload) => {
-  return jwt.sign(payload, process.env.mailToken, { expiresIn: "15m" });
+  return jwt.sign(payload, process.env.mailToken, { expiresIn: "60m" });
 };
 
-exports.verifyMailToken = async (token) => {
-  return jwt.verify(token, process.env.mailToken, async (err, user) => {
-    if (err) {
-      await Token.deleteOne({mailToken: token})
-      throw { status: 403, message: "Token Expired!" }
-    }
-     return user;
-  });
+exports.verifyMailToken = async (req, res, next) => {
+  try {
+    const { authorization } = req.headers;
+    const token = authorization?.split(" ")[1];
+    if (!token) throw { status: 404, message: "Provide Token!" };
+    if (!(await Token.countDocuments({ mailToken: token })))
+      throw { status: 404, message: "Token Not Found" };
+    jwt.verify(token, process.env.mailToken, async (err, user) => {
+      if (err) {
+        await Token.deleteOne({ mailToken: token });
+        throw { status: 403, message: "Token Expired!" };
+      }
+      req.user = user;
+      next();
+    });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({message : err.message || "Internal Error" });
+  }
 };

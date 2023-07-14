@@ -13,22 +13,24 @@ const { createPassword } = require("../../middlewares/bcrypt");
 const { sendMail, sendTestMail } = require("./mailer");
 
 router.get("/", (req, res) => {
-  res.send("Signup");
+  res.json({ message: "Signup" });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", verifyMailToken, async (req, res) => {
   try {
+    const { name, username, password, profile, socials } = req.body;
     const user = new User({
-      name: req.body.name,
-      username: req.body.username,
-      password: createPassword(req.body.password),
-      email: req.body.email,
-      profile: req.body.profile,
-      designation: req.body.designation,
-      company: req.body.company,
-      about: req.body.about,
+      name,
+      username,
+      password: createPassword(password),
+      email: req.user?.email,
+      profile,
+      socials
     });
     const data = await user.save();
+    await Token.deleteOne({
+      mailToken: req.headers["authorization"].split(" ")[1],
+    });
     const token = new Token({
       refreshToken: generateRefreshToken({ username: user.username }),
     });
@@ -36,9 +38,9 @@ router.post("/", async (req, res) => {
     req.session.access = generateAccessToken({ username: user.username });
     req.session.refesh = token.refreshToken;
     req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-    res.send(data);
+    res.status(201).json({message: "New User Created Successfully"});
   } catch (err) {
-    res.status(500).send(err.errors || err);
+    res.status(500).send(err);
   }
 });
 
@@ -46,13 +48,16 @@ router.post("/", async (req, res) => {
 router.post("/mail", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) throw { status: 404, message: "Provide an Email for Verification" };
+    if (!email)
+      throw { status: 404, message: "Provide an Email for Verification" };
     const token = new Token({
       mailToken: generateMailToken({ email }),
     });
     let data = await token.save();
-    let mailReponse = await sendMail(email, data._id)
-    res.status(201).json({message: `Email Sent to ${mailReponse.accepted[0]}`});
+    let mailReponse = await sendMail(email, data.mailToken);
+    res
+      .status(201)
+      .json({ message: `Email Sent to ${mailReponse.accepted[0]}` });
   } catch (err) {
     res
       .status(err.status || 500)
@@ -65,14 +70,10 @@ router.post("/mail", async (req, res) => {
 //   res.sendStatus(200)
 // })
 
-router.get("/verify", async (req, res) => {
+router.post("/verify", verifyMailToken, (req, res) => {
   try {
-    const { token } = req.query;
-    if (!token) throw { status: 404, message: "Provide Token" };
-    let data = await Token.findById(token);
-    if (!data) throw { status: 404, message: "Token not found" };
-    let respose = await verifyMailToken(data.mailToken);
-    res.status(201).json(respose);
+    let user = req?.user?.email;
+    res.status(201).json({ email: user, error: false });
   } catch (err) {
     res
       .status(err.status || 500)
@@ -80,6 +81,18 @@ router.get("/verify", async (req, res) => {
   }
 });
 
-// [Object.keys(err.errors)[0]].message
+router.post("/unique", async (req, res) => {
+  try {
+    const { username } = req.query;
+    if (!username) throw { status: 404, message: "No Username" };
+    let data = await User.findOne({ username });
+    if (data) throw { status: 403, message: "Username must be unique" };
+    res.status(201).json({ message: "That's Unique" });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
 
 module.exports = router;
