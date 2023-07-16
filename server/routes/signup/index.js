@@ -12,8 +12,10 @@ const Token = require("../../models/token");
 const { createPassword } = require("../../middlewares/bcrypt");
 const { sendMail, sendTestMail } = require("./mailer");
 
-router.get("/", (req, res) => {
-  res.json({ message: "Signup" });
+router.get("/", (req, res) => { 
+  req.session.refesh = "Hello" 
+  req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+  res.json({ message: "Signup", id: req.sessionID || "None" });
 });
 
 router.post("/", verifyMailToken, async (req, res) => {
@@ -35,9 +37,10 @@ router.post("/", verifyMailToken, async (req, res) => {
       refreshToken: generateRefreshToken({ username: user.username }),
     });
     await token.save();
-    req.session.access = generateAccessToken({ username: user.username });
-    req.session.refesh = token.refreshToken;
-    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+    // req.session.access = generateAccessToken({ username: user.username });
+    // req.session.refesh = token.refreshToken;
+    // req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+    res.cookie("parallelVortex",{name: user.name, username: user.username, profile: user.profile, access: generateAccessToken({ username: user.username }), refresh: token.refreshToken})
     res.status(201).json({message: "New User Created Successfully"});
   } catch (err) {
     res.status(500).send(err);
@@ -48,8 +51,8 @@ router.post("/", verifyMailToken, async (req, res) => {
 router.post("/mail", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email)
-      throw { status: 404, message: "Provide an Email for Verification" };
+    if (!email) throw { status: 404, message: "Provide an Email for Verification" };
+    if (await User.countDocuments({email})) throw { status: 401, message: "Email Alreay Registered" };
     const token = new Token({
       mailToken: generateMailToken({ email }),
     });

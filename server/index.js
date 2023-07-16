@@ -2,20 +2,21 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const session = require("express-session");
-const store = new session.MemoryStore();
+// const session = require("express-session");
+// const store = new session.MemoryStore();
 const Mongoose = require("mongoose");
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(
-    cors({
-      origin: "http://localhost:3000",
-      methods: "GET,POST,PUT,DELETE",
-      credentials: true,
-      // allowedHeaders: true
-    })
-  );
+  cors({
+    origin: ["http://localhost:3000"],
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+    // exposedHeaders: ["set-cookie"],
+    // allowedHeaders: true
+  })
+);
 
 const userRoute = require("./routes/user");
 const articleRoute = require("./routes/article");
@@ -30,25 +31,27 @@ db.on("erorr", (err) => console.log(err));
 db.on("open", () => console.log("Connected to DB"));
 
 app.use(cookieParser());
-app.use(
-  session({
-    name: "parallelVortex",
-    secret: process.env.sessionSecret,
-    resave: true,
-    saveUninitialized: false,
-    store,
-    cookie: {
-        sameSite: "strict",
-    },
-})
-);
+// app.use(
+//   session({
+//     proxy: true,
+//     name: "parallelVortex",
+//     secret: process.env.sessionSecret,
+//     resave: false,
+//     saveUninitialized: false,
+//     store,
+//     cookie: {
+//       sameSite: "lax",
+//       secure: true,
+//     },
+//   })
+// );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log(store);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log(store);
+//   next();
+// });
 
 app.use("/user", userRoute);
 app.use("/article", articleRoute);
@@ -61,3 +64,5 @@ app.get("/hello", (req, res) => {
 });
 
 app.listen(PORT, console.log(`Listening to ${PORT}`));
+
+module.exports = app;

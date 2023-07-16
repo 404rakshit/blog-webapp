@@ -10,27 +10,56 @@ const User = require("../../models/user");
 const { checkPassword } = require("../../middlewares/bcrypt");
 const Token = require("../../models/token");
 
-router.get("/", (req, res) => {
-  res.json("Login");
-});
+router.get(
+  "/",
+  (req, res, next) => {
+    if (!req.cookies["parallel"]) next();
+    else
+      res.json({
+        access: req.cookies["parallelVortex"].access,
+        refresh: req.cookies["parallelVortex"].refresh,
+      });
+  },
+  (req, res) => {
+    res.cookie(
+      "parallel",
+      { dsa: "String" },
+      {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      }
+    );
+    // res.header('Set-Cookie', 'cookieName=cookieValue; Path=/; Max-Age=3600');
+    res.json({ message: "Login" });
+  }
+);
 
 router.post("/", async (req, res) => {
   try {
-    const {username, password} = req.body
-    if (!username) throw {status: 404, message: "Need an Username for the Authentication!",};
-    if (!password) throw { status: 403, message: "Need a Password for the Authorization!" };
+    const { username, password } = req.body;
+    if (!username)
+      throw {
+        status: 404,
+        message: "Need an Username for the Authentication!",
+      };
+    if (!password)
+      throw { status: 403, message: "Need a Password for the Authorization!" };
 
     const user = await User.findOne({ username });
-    if (!user?.username) throw { status: 404, message: "User doesn't belong to us" };
-    if (!checkPassword(password, user?.password)) throw { status: 403, message: "Wrong Password!" };
+    if (!user?.username)
+      throw { status: 404, message: "User doesn't belong to us" };
+    if (!checkPassword(password, user?.password))
+      throw { status: 403, message: "Wrong Password!" };
 
     const token = new Token({
       refreshToken: generateRefreshToken({ username: user.username }),
     });
     await token.save();
-    req.session.access = generateAccessToken({ username: user.username })
-    req.session.refresh = token.refreshToken
-    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000
+    req.session.access = generateAccessToken({ username: user.username });
+    req.session.refresh = token.refreshToken;
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
     // res.cookie("access", generateAccessToken({ username: user.username }), {
     //   expires: new Date(Date.now() + 900000),
     //   httpOnly: true,
@@ -50,8 +79,7 @@ router.post("/token", async (req, res) => {
   try {
     const { refresh } = req.session;
     console.log(req.session);
-    if (!refresh)
-      throw { status: 404, message: "Token Unavailable" };
+    if (!refresh) throw { status: 404, message: "Token Unavailable" };
     if (!(await Token.countDocuments({ refreshToken: refresh })))
       throw { status: 404, message: "Token Expired Login Again" };
     // res.cookie("access", verifyRefreshToken(req.cookies.refresh) , {
@@ -77,13 +105,13 @@ router.get("/verify", verifyToken, (req, res) => {
   }
 });
 
-router.post("/check",(req,res)=>{
+router.post("/check", (req, res) => {
   try {
     // if(!req.session.access) throw {status: 404, message: "Token Not Found!"}
-    res.status(200).json({session: req.sessionID})
+    res.status(200).json({ session: req.sessionID });
   } catch (err) {
     res.status(err.status || 500).json(err.message);
   }
-})
+});
 
 module.exports = router;

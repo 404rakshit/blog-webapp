@@ -16,7 +16,7 @@ exports.generateAccessToken = generateAccessToken = (payload) => {
 };
 
 exports.generateRefreshToken = (payload) => {
-  return jwt.sign(payload, process.env.refreshToken);
+  return jwt.sign(payload, process.env.refreshToken, { expiresIn: "30d" });
 };
 
 exports.verifyRefreshToken = (token) => {
