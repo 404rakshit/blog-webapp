@@ -27,7 +27,7 @@ export default function Article({ data }) {
 
             <section className="flex max-xl:flex-col-reverse gap-3 items-start justify-between">
                 <div className="flex flex-col py-3 gap-2 w-full">
-                    {data?.title ? <h3 className={`${jose.className} text-2xl leading-6`}>{data.title}</h3> : <span className="h-10 w-96 animate-pulse bg-zinc-100 rounded-md"></span>}
+                    {data?.title ? <h3 className={`${jose.className} text-2xl leading-7`}>{data.title}</h3> : <span className="h-10 w-96 animate-pulse bg-zinc-100 rounded-md"></span>}
                     {data?.description ? <p className="text-zinc-400 text-sm line-clamp-3">{data.description}</p> : <><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span></>}
                 </div>
 

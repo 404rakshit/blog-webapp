@@ -3,7 +3,7 @@ import { jose } from "@/components/Fonts";
 import Head from "next/head";
 import Image from "next/image";
 
-export async function getStaticProps(ctx) {
+export async function getServerSideProps(ctx) {
 
   const data = await fetch(`${process.env.SERVER_URL}/article`).then(res => res.json())
   const people = await fetch(`${process.env.SERVER_URL}/user?limit=3`).then(res => res.json())
@@ -17,6 +17,7 @@ export async function getStaticProps(ctx) {
 }
 
 export default function Home({ data, people }) {
+
   return (
     <>
       <Head>
@@ -32,7 +33,7 @@ export default function Home({ data, people }) {
 
             <form onClick={() => {
               document.querySelector('#input').focus()
-            }} onSubmit={(e)=>{
+            }} onSubmit={(e) => {
               e.preventDefault()
             }} className="flex max-xl:w-full max-xl:px-4 items-center group hover:border-zinc-400 focus-within:border-zinc-400 transition-all duration-300 justify-start rounded-full py-2 px-3 border cursor-text">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 stroke-zinc-400 transition-all duration-300 group-hover:scale-110 group-focus-within:scale-110">
@@ -102,8 +103,8 @@ export default function Home({ data, people }) {
 
           <div className="flex flex-col gap-4">
             <label className={`${jose.className} text-2xl my-2`}>My reading list</label>
-            
-            {}
+
+            { }
           </div>
 
         </div>

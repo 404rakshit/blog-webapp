@@ -10,20 +10,31 @@ const User = require("../../models/user");
 const { checkPassword } = require("../../middlewares/bcrypt");
 const Token = require("../../models/token");
 
-router.get(
-  "/",
-  (req, res, next) => {
-    if (!req.cookies["parallel"]) next();
-    else
-      res.json({
-        access: req.cookies["parallelVortex"].access,
-        refresh: req.cookies["parallelVortex"].refresh,
-      });
-  },
-  (req, res) => {
+router.get("/", (req, res) => {
+  res.json({ msg: "Login Sucessfully" });
+});
+
+router.post("/", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    // console.log(username, password);
+    if (!username && !password)
+      throw { status: 404, message: "Misiing Cridentials" };
+    let user = await User.findOne({ username });
+    if (!user) throw { status: 404, message: "User doesn't exisits" };
+    // console.log(user);
+    if (!checkPassword(password, user?.password))
+      throw { status: 403, message: "Wrong Password!" };
+    const token = new Token({
+      refreshToken: generateRefreshToken({ username: user.username }),
+    });
+    await token.save();
     res.cookie(
-      "parallel",
-      { dsa: "String" },
+      "parallelVortex",
+      {
+        username: user.username,
+        token: token.refreshToken,
+      },
       {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
@@ -31,10 +42,27 @@ router.get(
         sameSite: "none",
       }
     );
-    // res.header('Set-Cookie', 'cookieName=cookieValue; Path=/; Max-Age=3600');
-    res.json({ message: "Login" });
+    res.cookie("parallel", generateAccessToken({ username: user.username }), {
+      maxAge: 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.status(200).json({
+      message: "Login Successfully",
+      name: user?.name,
+      username: user?.username,
+      email: user?.email,
+      profile: user?.profile,
+    });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
   }
-);
+});
+
+// res.header('Set-Cookie', 'cookieName=cookieValue; Path=/; Max-Age=3600');
 
 router.post("/", async (req, res) => {
   try {

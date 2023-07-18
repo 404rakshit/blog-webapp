@@ -10,13 +10,14 @@ const PORT = process.env.PORT || 8080;
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000","http://192.168.122.125:3000"],
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
-    // exposedHeaders: ["set-cookie"],
-    // allowedHeaders: true
+    exposedHeaders: ["set-cookie"],
+    // allowedHeaders: true,
   })
 );
+app.use(cookieParser());
 
 const userRoute = require("./routes/user");
 const articleRoute = require("./routes/article");
@@ -30,7 +31,6 @@ const db = Mongoose.connection;
 db.on("erorr", (err) => console.log(err));
 db.on("open", () => console.log("Connected to DB"));
 
-app.use(cookieParser());
 // app.use(
 //   session({
 //     proxy: true,
@@ -45,8 +45,8 @@ app.use(cookieParser());
 //     },
 //   })
 // );
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // app.use((req, res, next) => {
 //   console.log(store);

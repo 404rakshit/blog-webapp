@@ -10,10 +10,10 @@ const {
 const User = require("../../models/user");
 const Token = require("../../models/token");
 const { createPassword } = require("../../middlewares/bcrypt");
-const { sendMail, sendTestMail } = require("./mailer");
+const { sendMail } = require("./mailer");
 
-router.get("/", (req, res) => { 
-  req.session.refesh = "Hello" 
+router.get("/", (req, res) => {
+  req.session.refesh = "Hello";
   req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
   res.json({ message: "Signup", id: req.sessionID || "None" });
 });
@@ -27,7 +27,7 @@ router.post("/", verifyMailToken, async (req, res) => {
       password: createPassword(password),
       email: req.user?.email,
       profile,
-      socials
+      socials,
     });
     const data = await user.save();
     await Token.deleteOne({
@@ -40,8 +40,32 @@ router.post("/", verifyMailToken, async (req, res) => {
     // req.session.access = generateAccessToken({ username: user.username });
     // req.session.refesh = token.refreshToken;
     // req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-    res.cookie("parallelVortex",{name: user.name, username: user.username, profile: user.profile, access: generateAccessToken({ username: user.username }), refresh: token.refreshToken})
-    res.status(201).json({message: "New User Created Successfully"});
+    res.cookie(
+      "parallelVortex",
+      {
+        username: user.username,
+        token: token.refreshToken,
+      },
+      {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      }
+    );
+    res.cookie("parallel", generateAccessToken({ username: user.username }), {
+      maxAge: 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.status(201).json({
+      message: "New User Created Successfully",
+      name,
+      username,
+      email: req.user?.email,
+      profile,
+    });
   } catch (err) {
     res.status(500).send(err);
   }
@@ -51,8 +75,10 @@ router.post("/", verifyMailToken, async (req, res) => {
 router.post("/mail", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) throw { status: 404, message: "Provide an Email for Verification" };
-    if (await User.countDocuments({email})) throw { status: 401, message: "Email Alreay Registered" };
+    if (!email)
+      throw { status: 404, message: "Provide an Email for Verification" };
+    if (await User.countDocuments({ email }))
+      throw { status: 401, message: "Email Alreay Registered" };
     const token = new Token({
       mailToken: generateMailToken({ email }),
     });

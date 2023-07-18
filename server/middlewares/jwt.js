@@ -19,14 +19,11 @@ exports.generateRefreshToken = (payload) => {
   return jwt.sign(payload, process.env.refreshToken, { expiresIn: "30d" });
 };
 
-exports.verifyRefreshToken = (token) => {
-  return jwt.verify(token, process.env.refreshToken, (err, user) => {
-    if (err) throw { status: 403, message: "Please Login Again" };
-    return generateAccessToken({ username: user.username });
-  });
+exports.generateMailToken = (payload) => {
+  return jwt.sign(payload, process.env.mailToken, { expiresIn: "60m" });
 };
 
-exports.verifyToken = (req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
   try {
     const autHeader = req.headers["authorization"];
     const token = autHeader && autHeader.split(" ")[1];
@@ -42,8 +39,23 @@ exports.verifyToken = (req, res, next) => {
   }
 };
 
-exports.generateMailToken = (payload) => {
-  return jwt.sign(payload, process.env.mailToken, { expiresIn: "60m" });
+exports.verifyRefreshToken = async (req, res, next) => {
+  try {
+    const autHeader = req.headers["authorization"];
+    const token = autHeader && autHeader.split(" ")[1];
+    if (!token) throw { status: 401, message: "Token Missing" };
+    if (!(await Token.countDocuments({ refreshToken: token })))
+      throw { status: 404, message: "Token Not Found" };
+    
+    jwt.verify(token, process.env.refreshToken, (err, user) => {
+      if (err) throw { status: 403, message: "Token Expired!", token };
+      req.user = user;
+      next();
+    });
+  } catch (err) {
+    // if (err.token) await Token.deleteOne({ refreshToken: err.token });
+    res.status(err.status || 500).json(err.message);
+  }
 };
 
 exports.verifyMailToken = async (req, res, next) => {
@@ -53,17 +65,16 @@ exports.verifyMailToken = async (req, res, next) => {
     if (!token) throw { status: 404, message: "Provide Token!" };
     if (!(await Token.countDocuments({ mailToken: token })))
       throw { status: 404, message: "Token Not Found" };
-    jwt.verify(token, process.env.mailToken, async (err, user) => {
-      if (err) {
-        await Token.deleteOne({ mailToken: token });
-        throw { status: 403, message: "Token Expired!" };
-      }
+
+    jwt.verify(token, process.env.mailToken, (err, user) => {
+      if (err) throw { status: 403, message: "Token Expired!", token };
       req.user = user;
       next();
     });
   } catch (err) {
+    if (err.token) await Token.deleteOne({ refreshToken: err.token });
     res
       .status(err.status || 500)
-      .json({message : err.message || "Internal Error" });
+      .json({ message: err.message || "Internal Error" });
   }
 };

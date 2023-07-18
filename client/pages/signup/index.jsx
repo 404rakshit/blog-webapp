@@ -1,14 +1,16 @@
 import { jose } from "@/components/Fonts";
+import { popUp } from "@/components/Modal";
 import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
 
 export default function SignUp() {
 
   const router = useRouter();
-  const token = router.query.token
+  const token = router.query.token || null
   const [load, setLoad] = useState(true)
   const [form, setForm] = useState(1);
   const [msgUnique, setMsgUnique] = useState("");
@@ -16,6 +18,7 @@ export default function SignUp() {
   const [email, setEmail] = useState("")
   const [uname, setUname] = useState(null)
   const [pass, setPass] = useState(null)
+  const [cookie, setCookie] = useCookies(["data"])
 
   useEffect(() => {
     if (token) {
@@ -33,6 +36,7 @@ export default function SignUp() {
           // console.log(JSON.stringify(response.data));
           setLoad(true)
           setEmail(response.data.email)
+          document.getElementById("loading").classList.replace("flex", "hidden")
         })
         .catch((error) => {
           // console.log(error);
@@ -52,9 +56,10 @@ export default function SignUp() {
 
         {/* Right Hand Side */}
         <div className="flex flex-col items-center min-h-[90svh] flex-1 max-xl:w-full gap-10 py-5">
-          {/* {token} */}
-
-          {/* <p className="text-center hidden" id="t">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos quaerat natus distinctio exercitationem nulla vero quo molestias eaque? Repudiandae temporibus dolorum molestias culpa odit possimus commodi sed in fugiat quae.</p> */}
+          <div id="loading" className="absolute z-10 flex flex-col items-center justify-center h-full w-full bg-white">
+            <svg width="32px" height="32px" viewBox="0 0 58 58" xmlns="http://www.w3.org/2000/svg" color="#000000"><g stroke="currentColor" fill="currentColor" transform="translate(2 1)" stroke-width="1.5" fill-rule="evenodd"><circle cx="42.601" cy="11.462" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="1;0;0;0;0;0;0;0" calcMode="linear" repeatCount="indefinite"></animate></circle><circle cx="49.063" cy="27.063" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="0;1;0;0;0;0;0;0" calcMode="linear" repeatCount="indefinite"></animate></circle><circle cx="42.601" cy="42.663" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="0;0;1;0;0;0;0;0" calcMode="linear" repeatCount="indefinite"></animate></circle><circle cx="27" cy="49.125" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="0;0;0;1;0;0;0;0" calcMode="linear" repeatCount="indefinite"></animate></circle><circle cx="11.399" cy="42.663" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="0;0;0;0;1;0;0;0" calcMode="linear" repeatCount="indefinite"></animate></circle><circle cx="4.938" cy="27.063" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="0;0;0;0;0;1;0;0" calcMode="linear" repeatCount="indefinite"></animate></circle><circle cx="11.399" cy="11.462" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="0;0;0;0;0;0;1;0" calcMode="linear" repeatCount="indefinite"></animate></circle><circle cx="27" cy="5" r="5"><animate attributeName="fill-opacity" begin="0s" dur="1.3s" values="0;0;0;0;0;0;0;1" calcMode="linear" repeatCount="indefinite"></animate></circle></g></svg>
+            <span className="animate-pulse uppercase font-semibold text-zinc-500">Loading</span>
+          </div>
 
           {/* Icon */}
           <span className="p-3 rounded-lg border">
@@ -177,6 +182,7 @@ export default function SignUp() {
                 <input onChange={(e) => {
                   setPass(null)
                   if (!e.target.value) return document.getElementById("passMsg").textContent = "Password is null"
+                  if (e.target.value.length < 8) return document.getElementById("passMsg").textContent = "Password is too short"
                   if (e.target.value != document.querySelector("#pass2").value) return document.getElementById("passMsg").textContent = "Password Unequal"
                   document.getElementById("passMsg").textContent = "Password Matched"
                   setPass(e.target.value)
@@ -194,7 +200,7 @@ export default function SignUp() {
                   setPass(e.target.value)
                 }} id="pass2" className={`${jose.className} text-xl leading-none outline-none py-3 max-xl:py-4 px-4 bg-zinc-100 rounded-md focus:border-black disabled:opacity-70 disabled:cursor-not-allowed bg-transparent w-[370px] max-w-[90svw]`} autoComplete="off" type="password" placeholder="Password Again" required />
               </span>
-              <p id="passMsg" className="font-semibold text-sm opacity-50">Password is null</p>
+              <p id="passMsg" className="font-semibold text-sm opacity-50 select-none">Password is null</p>
             </section>
           </div>
 
@@ -257,19 +263,28 @@ export default function SignUp() {
             method: 'post',
             maxBodyLength: Infinity,
             url: `${process.env.SERVER_URL}/signup`,
+            withCredentials: true,
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            data: data
+            data: data,
           };
 
           axios.request(config)
             .then((response) => {
-              console.log(JSON.stringify(response.data));
+              // console.log(JSON.stringify(response.data));
+              popUp(response.data.message)
+              setCookie("data", JSON.stringify(response.data),{
+                maxAge: 30 * 24 * 60 * 60,
+              })
+              setTimeout(() => {
+                router.reload()
+              }, 2000);
             })
             .catch((error) => {
-              console.log(error);
+              // console.log(error);
+              popUp(error.message + error.response?.data?.message)
             });
 
         }} id="submitBtn" className={`${jose.className} leading-tight items-end fixed flex gap-2 bottom-20 rounded-s right-0 bg-zinc-800 text-white font-semibold px-3 py-2 transition-all duration-200 ${name && uname && pass && !msgUnique ? null : 'translate-x-28'}`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
