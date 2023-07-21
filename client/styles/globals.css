@@ -5,3 +5,7 @@
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+input::-webkit-file-upload-button {
+  display: none;
+}

@@ -7,6 +7,7 @@ router.get("/", async (req, res) => {
   try {
     const articles = await Article.find({}).populate("author", [
       "name",
+      "username",
       "profile",
       "designation",
       "company",

@@ -20,6 +20,7 @@ router.post("/", async (req, res) => {
     // console.log(username, password);
     if (!username && !password)
       throw { status: 404, message: "Misiing Cridentials" };
+      // console.log(username,password)
     let user = await User.findOne({ username });
     if (!user) throw { status: 404, message: "User doesn't exisits" };
     // console.log(user);

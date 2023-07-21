@@ -49,7 +49,7 @@ export default function UserLog({ state }) {
 
                         let data = {
                             "username": document.getElementById("email").value,
-                            "password": document.getElementById("password").value
+                            "password": document.querySelector("#password").value
                         };
 
                         let config = {

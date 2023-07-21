@@ -11,6 +11,7 @@ const User = require("../../models/user");
 const Token = require("../../models/token");
 const { createPassword } = require("../../middlewares/bcrypt");
 const { sendMail } = require("./mailer");
+const { formReader, uploadImg } = require("../../middlewares/imageUpload");
 
 router.get("/", (req, res) => {
   req.session.refesh = "Hello";
@@ -18,58 +19,81 @@ router.get("/", (req, res) => {
   res.json({ message: "Signup", id: req.sessionID || "None" });
 });
 
-router.post("/", verifyMailToken, async (req, res) => {
-  try {
-    const { name, username, password, profile, socials } = req.body;
-    const user = new User({
-      name,
-      username,
-      password: createPassword(password),
-      email: req.user?.email,
-      profile,
-      socials,
-    });
-    const data = await user.save();
-    await Token.deleteOne({
-      mailToken: req.headers["authorization"].split(" ")[1],
-    });
-    const token = new Token({
-      refreshToken: generateRefreshToken({ username: user.username }),
-    });
-    await token.save();
-    // req.session.access = generateAccessToken({ username: user.username });
-    // req.session.refesh = token.refreshToken;
-    // req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-    res.cookie(
-      "parallelVortex",
-      {
-        username: user.username,
-        token: token.refreshToken,
-      },
-      {
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+router.post(
+  "/",
+  verifyMailToken,
+  formReader.single("profile"),
+  async (req, res) => {
+    try {
+      const { name, username, password, twitter, linkedin, insta } = req.body;
+      let profile = req.body.profile;
+
+      if (!username) throw { status: 404, message: "Must Provide Username" };
+      if (await User.countDocuments({ username: username }))
+        throw { status: 403, message: "Already Exists" };
+
+      if (!profile) {
+        if (!req.file) throw { status: 404, message: "Provide Image" };
+        profile = (
+          await uploadImg(
+            req.file.mimetype,
+            req.file.buffer,
+            "profile",
+            username
+          )
+        ).secure_url;
+      }
+
+      const user = new User({
+        name,
+        username,
+        password: createPassword(password),
+        email: req.user?.email,
+        profile: profile,
+        socials: [twitter, linkedin, insta],
+      });
+      const data = await user.save();
+      await Token.deleteOne({
+        mailToken: req.headers["authorization"].split(" ")[1],
+      });
+      const token = new Token({
+        refreshToken: generateRefreshToken({ username: user.username }),
+      });
+      await token.save();
+      // req.session.access = generateAccessToken({ username: user.username });
+      // req.session.refesh = token.refreshToken;
+      // req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      res.cookie(
+        "parallelVortex",
+        {
+          username: user.username,
+          token: token.refreshToken,
+        },
+        {
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        }
+      );
+      res.cookie("parallel", generateAccessToken({ username: user.username }), {
+        maxAge: 60 * 60 * 1000,
         httpOnly: true,
         secure: true,
         sameSite: "none",
-      }
-    );
-    res.cookie("parallel", generateAccessToken({ username: user.username }), {
-      maxAge: 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-    res.status(201).json({
-      message: "New User Created Successfully",
-      name,
-      username,
-      email: req.user?.email,
-      profile,
-    });
-  } catch (err) {
-    res.status(500).send(err);
+      });
+      res.status(201).json({
+        message: "New User Created Successfully",
+        name,
+        username,
+        email: req.user?.email,
+        profile,
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
   }
-});
+);
 
 // router.post("/mail", sendTestMail);
 router.post("/mail", async (req, res) => {

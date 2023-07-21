@@ -2,6 +2,7 @@ import { jose } from "@/components/Fonts";
 import Unaccess from "@/components/Unaccess";
 import axios from "axios";
 import Head from "next/head";
+import Link from "next/link";
 import { useEffect } from "react";
 // import { useCookies } from "react-cookie";
 
@@ -61,9 +62,10 @@ export default function Edit({ data, }) {
                             <span className="text-zinc-500 w-2/3 leading-4 text-sm">Good to have you back, have a look here</span>
                         </section>
                         <section className="flex max-xl:flex-col gap-3">
-                            <button className="flex gap-1 items-center justify-center p-2 px-3 rounded-md bg-zinc-800 hover:bg-zinc-900 max-lg:bg-zinc-900 text-white transition-all duration-300 font-semibold"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 max-lg:hidden">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 9.75V10.5" />
-                            </svg>Dashboard</button>
+                            <Link href={"/dashboard"} className="flex gap-1 items-center justify-center p-2 px-5 xl:px-8 rounded-md bg-zinc-800 hover:bg-zinc-900 max-lg:bg-zinc-900 text-white transition-all duration-300 font-semibold">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 max-lg:hidden">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
+                                </svg>Dashboard</Link>
                         </section>
                     </div>
 

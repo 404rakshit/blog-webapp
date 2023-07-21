@@ -18,6 +18,7 @@ export default function SignUp() {
   const [email, setEmail] = useState("")
   const [uname, setUname] = useState(null)
   const [pass, setPass] = useState(null)
+  const [file, setFile] = useState(null)
   const [cookie, setCookie] = useCookies(["data"])
 
   useEffect(() => {
@@ -151,8 +152,12 @@ export default function SignUp() {
 
               <span className="flex flex-col gap-3">
                 <label htmlFor="name" className={`${jose.className} text-lg translate-x-1`}>Select Avater</label>
-                <div className="flex flex-col items-center gap-2 flex-wrap h-32">
-
+                {!!file ? <img
+                  id="imgDisplay"
+                  src={file}
+                  alt=""
+                  class="h-40 w-40 rounded-full object-cover bg-slate-200 self-center"
+                /> : <div className="flex flex-col items-center gap-2 flex-wrap h-32">
                   <span><input id="1p" type="radio" name="profile" className="hidden peer" value={"/1.webp"} /><label htmlFor="1p" className="opacity-30 peer-checked:opacity-100 transition-all  duration-300 cursor-pointer"><Image className="rounded-full bg-zinc-100" src={"/1.webp"} width={60} height={60} /></label></span>
                   <span><input id="2p" type="radio" name="profile" className="hidden peer" value={"/2.webp"} /><label htmlFor="2p" className="opacity-30 peer-checked:opacity-100 transition-all  duration-300 cursor-pointer"><Image className="rounded-full bg-zinc-100" src={"/2.webp"} width={60} height={60} /></label></span>
                   <span><input id="3p" type="radio" name="profile" className="hidden peer" value={"/3.webp"} /><label htmlFor="3p" className="opacity-30 peer-checked:opacity-100 transition-all  duration-300 cursor-pointer"><Image className="rounded-full bg-zinc-100" src={"/3.webp"} width={60} height={60} /></label></span>
@@ -163,11 +168,22 @@ export default function SignUp() {
                   <span><input id="8p" type="radio" name="profile" className="hidden peer" value={"/8.webp"} /><label htmlFor="8p" className="opacity-30 peer-checked:opacity-100 transition-all  duration-300 cursor-pointer"><Image className="rounded-full bg-zinc-100" src={"/8.webp"} width={60} height={60} /></label></span>
                   <span><input id="9p" type="radio" name="profile" className="hidden peer" value={"/9.webp"} /><label htmlFor="9p" className="opacity-30 peer-checked:opacity-100 transition-all  duration-300 cursor-pointer"><Image className="rounded-full bg-zinc-100" src={"/9.webp"} width={60} height={60} /></label></span>
                   <span><input id="10p" type="radio" name="profile" className="hidden peer" value={"/10.webp"} /><label htmlFor="10p" className="opacity-30 peer-checked:opacity-100 transition-all  duration-300 cursor-pointer"><Image className="rounded-full bg-zinc-100" src={"/10.webp"} width={60} height={60} /></label></span>
-                </div>
-                <button id="avatar" className={`${jose.className} flex gap-2 items-end justify-center text-xl leading-none outline-none py-3 max-xl:py-4 px-4 bg-zinc-800 text-white rounded-md focus:border-black disabled:opacity-70 disabled:cursor-not-allowed bg-transparent w-[370px] max-w-[90svw]`} disabled autoComplete="off" type="text">Upload Image <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                </svg>
-                </button>
+                </div>}
+
+                {/* <hr className="my-4 w-2/3 border-zinc-400 self-center" /> */}
+
+                <input onChange={(event) => {
+                  const selectedFile = event.target.files[0];
+                  if (!selectedFile) return setFile(null)
+                  const fileReader = new FileReader();
+
+                  fileReader.onload = function (event) {
+                    const fileContents = event.target.result;
+                    setFile(fileContents)
+                  };
+                  fileReader.readAsDataURL(selectedFile);
+                }} id="avatar" className={`${jose.className} my-3 text-xl leading-none outline-none py-3 max-xl:py-4 px-4 bg-zinc-800 text-white rounded-md disabled:opacity-70 disabled:cursor-not-allowed bg-transparent w-[370px] max-w-[90svw]`} autoComplete="off" type="file" accept="image/png, image/jpeg" />
+
               </span>
 
 
@@ -255,9 +271,14 @@ export default function SignUp() {
         {/* Submit Btn */}
         <button onClick={(e) => {
 
-          let data = JSON.stringify({
-            name, username: uname, password: pass, profile: document.querySelector('input[name="profile"]:checked')?.value || "/1.webp", social: [document.getElementById('twitter').value || null, document.getElementById('linkedin').value || null, document.getElementById('insta').value || null]
-          });
+          let data = new FormData()
+          data.append('name', name),
+            data.append('username', uname);
+          data.append('profile', file ? document.getElementById('avatar').files[0] : document.querySelector('input[name="profile"]:checked')?.value || "/1.webp");
+          data.append('password', pass)
+          data.append('twitter', document.getElementById('twitter').value || null)
+          data.append('linkedin', document.getElementById('linkedin').value || null)
+          data.append('insta', document.getElementById('insta').value || null)
 
           let config = {
             method: 'post',
@@ -265,21 +286,22 @@ export default function SignUp() {
             url: `${process.env.SERVER_URL}/signup`,
             withCredentials: true,
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${token}`,
             },
             data: data,
           };
 
+          console.log(data)
+          console.log(document.getElementById('avatar').files[0])
+
           axios.request(config)
             .then((response) => {
-              // console.log(JSON.stringify(response.data));
               popUp(response.data.message)
-              setCookie("data", JSON.stringify(response.data),{
+              setCookie("data", JSON.stringify(response.data), {
                 maxAge: 30 * 24 * 60 * 60,
               })
               setTimeout(() => {
-                router.reload()
+                window.location.replace("/");
               }, 2000);
             })
             .catch((error) => {
@@ -291,7 +313,7 @@ export default function SignUp() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>Submit</button>
 
-      </main>
+      </main >
     </>
   ) : <>
     <Head>

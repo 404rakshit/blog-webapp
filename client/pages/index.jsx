@@ -2,6 +2,7 @@ import Article from "@/components/Article";
 import { jose } from "@/components/Fonts";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 
 export async function getServerSideProps(ctx) {
 
@@ -84,7 +85,7 @@ export default function Home({ data, people }) {
             <label className={`${jose.className} text-2xl my-2`}>People you might be interested</label>
 
             {people ? people.map(e => {
-              return (<section key={e._id} className="flex items-center justify-between">
+              return (<Link href={`/user/${e.username}`} key={e._id} className="flex items-center justify-between">
 
                 <span className="flex flex-shrink gap-2">
                   <Image loader={() => e.profile} src={e.profile} className="rounded-full object-cover" width={55} height={55} />
@@ -97,7 +98,7 @@ export default function Home({ data, people }) {
 
                 <span className={` ${jose.className} h-fit flex gap-1 items-center rounded-full border px-5 py-3 text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-100 font-medium leading-3`}>Follow</span>
 
-              </section>)
+              </Link>)
             }) : <></>}
           </div>
 

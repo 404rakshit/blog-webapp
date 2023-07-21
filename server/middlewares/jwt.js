@@ -54,6 +54,7 @@ exports.verifyRefreshToken = async (req, res, next) => {
     });
   } catch (err) {
     // if (err.token) await Token.deleteOne({ refreshToken: err.token });
+
     res.status(err.status || 500).json(err.message);
   }
 };
