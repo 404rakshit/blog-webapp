@@ -38,6 +38,9 @@ const userSchema = new Schema(
     profile: {
       type: String,
     },
+    cover: {
+      type: String,
+    },
     designation: {
       type: String,
     },

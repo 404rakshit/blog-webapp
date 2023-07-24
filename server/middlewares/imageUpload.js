@@ -7,7 +7,7 @@ cloudinary.config({
   api_secret: process.env.api_secret,
 });
 
-exports.formReader = multer();
+exports.formReader = multer({ limits: { fieldSize: 10 * 1024 * 1024 } });
 
 exports.uploadImg = async (mimetype, buffer, picname, username) => {
   return await cloudinary.uploader.upload(
@@ -16,6 +16,17 @@ exports.uploadImg = async (mimetype, buffer, picname, username) => {
     (error, result) => {
       if (error)
         throw { status: 403, message: "Error uploading the buffer file" };
+      return result;
+    }
+  );
+};
+
+exports.uploadBufferImg = async (buffer, picname, username) => {
+  return await cloudinary.uploader.upload(
+    buffer,
+    { public_id: picname, folder: username },
+    (error, result) => {
+      if (error) return console.log({ status: 403, message: "Error uploading the buffer file" });
       return result;
     }
   );

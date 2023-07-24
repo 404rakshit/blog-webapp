@@ -175,6 +175,11 @@ export default function SignUp() {
                 <input onChange={(event) => {
                   const selectedFile = event.target.files[0];
                   if (!selectedFile) return setFile(null)
+                  if (selectedFile.size > 1024 * 10000) {
+                    popUp("Too Large File")
+                    return null
+                  }
+
                   const fileReader = new FileReader();
 
                   fileReader.onload = function (event) {
@@ -272,8 +277,8 @@ export default function SignUp() {
         <button onClick={(e) => {
 
           let data = new FormData()
-          data.append('name', name),
-            data.append('username', uname);
+          data.append('name', name)
+          data.append('username', uname)
           data.append('profile', file ? document.getElementById('avatar').files[0] : document.querySelector('input[name="profile"]:checked')?.value || "/1.webp");
           data.append('password', pass)
           data.append('twitter', document.getElementById('twitter').value || null)
@@ -291,8 +296,8 @@ export default function SignUp() {
             data: data,
           };
 
-          console.log(data)
-          console.log(document.getElementById('avatar').files[0])
+          // console.log(data)
+          // console.log(document.getElementById('avatar').files[0])
 
           axios.request(config)
             .then((response) => {

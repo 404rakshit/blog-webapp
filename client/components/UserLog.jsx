@@ -45,6 +45,7 @@ export default function UserLog({ state }) {
                     <hr className="my-4 border-zinc-300 w-40" />
 
                     <form onSubmit={(e) => {
+                        document.getElementById("loginBtn").disabled = true;
                         e.preventDefault()
 
                         let data = {
@@ -70,12 +71,13 @@ export default function UserLog({ state }) {
                                     username: response?.data?.username,
                                     email: response?.data?.email,
                                     profile: response?.data?.profile
-                                }),{
+                                }), {
                                     maxAge: 30 * 24 * 60 * 60
                                 })
                                 router.reload()
                             })
                             .catch((error) => {
+                                document.getElementById("loginBtn").disabled = false
                                 popUp(error.message + " (" + error?.response?.data?.message + ")");
                                 console.log(error);
                             });
@@ -83,10 +85,15 @@ export default function UserLog({ state }) {
                     }} className="flex flex-col items-center gap-4">
                         <div className="flex flex-col gap-4 items-center">
                             <div className="flex flex-col gap-2">
-                                <input id="email" className={`${jose.className} text-xl leading-none outline-none py-3 max-xl:py-4 px-4 bg-zinc-200 rounded-md focus:border-black bg-transparent w-[370px] max-w-[90svw]`} autoComplete="off" type="text" placeholder="Username or Email" required />
+                                <input id="email" onKeyDown={(event) => {
+                                    var key = event.keyCode;
+                                    if (key === 32) {
+                                        event.preventDefault();
+                                    }
+                                }} className={`${jose.className} text-xl leading-none outline-none py-3 max-xl:py-4 px-4 bg-zinc-200 rounded-md focus:border-black bg-transparent w-[370px] max-w-[90svw]`} autoComplete="off" type="text" placeholder="Username or Email" required />
                                 <input id="password" className={`${jose.className} text-xl leading-none outline-none py-3 max-xl:py-4 px-4 bg-zinc-200 rounded-md focus:border-black bg-transparent w-[370px] max-w-[90svw]`} type="password" placeholder="Password" required />
                             </div>
-                            <button className="relative rounded-full flex p-3 xl:py-2 bg-blue-600 lg:hover:bg-blue-700 w-full transition-all duration-200" type="submit">
+                            <button id="loginBtn" className="relative rounded-full flex p-3 xl:py-2 bg-blue-600 lg:hover:bg-blue-700 disabled:opacity-50 w-full transition-all duration-200" type="submit">
                                 <span className={`${jose.className} duration-200 transition-opacity text-white text-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`}>Login</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 mr-0 ml-auto stroke-white flex-shrink-0">
                                     <path strokeLinecap="round" d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25" />

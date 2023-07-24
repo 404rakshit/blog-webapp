@@ -53,7 +53,7 @@ export default function Article({ data }) {
                     </div>
                 </div>
 
-                {data?.cover ? <div className="flex-shrink-0 relative xl:h-44 h-60 w-80 rounded-lg max-xl:w-full overflow-hidden my-auto"><Image loader={() => data.cover} src={data.cover} fill className="rounded-lg xl:hover:scale-110 transition-all duration-200 cursor-pointer object-cover max-xl:w-full" /> </div> : <div className="h-40 w-72 max-xl:w-full max-xl:h-80 bg-zinc-100 rounded-lg animate-pulse"></div>}
+                {data?.cover ? <div className="flex-shrink-0 relative xl:h-48 h-60 w-80 rounded-lg max-xl:w-full overflow-hidden my-auto"><Image loader={() => data.cover} src={data.cover} fill className="rounded-lg xl:hover:scale-110 transition-all duration-200 cursor-pointer object-cover max-xl:w-full" /> </div> : <div className="h-40 w-72 max-xl:w-full max-xl:h-80 bg-zinc-100 rounded-lg animate-pulse"></div>}
 
             </section>
 

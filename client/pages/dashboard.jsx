@@ -4,51 +4,42 @@ import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { Refesh } from "@/components/Refesh"
 // import { useCookies } from "react-cookie";
 
 export async function getServerSideProps(ctx) {
 
+    let cookie = ctx.req.cookies?.parallelVortex
+    let userData = null;
+
+    if (cookie) {
+        userData = (await axios.request({
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `http://localhost:8080/user`,
+            headers: {
+                'Authorization': `Bearer ${cookie}`,
+            }
+        })).data
+    }
+
     return {
         props: {
-            data: ctx.req.cookies
+            data: ctx.req.cookies,
+            userData
         }
     }
 }
 
-export default function Dashboard({ data, }) {
+export default function Dashboard({ data, userData }) {
     let clientCookie = data?.data
     let serverCookie = data?.parallelVortex
-    // const [cookie, setCookie] = useCookies(["data"])
-    if (serverCookie) serverCookie = JSON.parse(data?.parallelVortex?.substring(2))
     if (clientCookie) clientCookie = JSON.parse(data?.data)
 
-    useEffect(() => {
-        if (serverCookie?.token && !data?.parallel) {
+    Refesh(data?.parallelVortex, data?.parallel)
 
-            let config = {
-                method: 'get',
-                maxBodyLength: Infinity,
-                url: 'http://localhost:8080/user/refresh',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${serverCookie.token}`
-                },
-                withCredentials: true,
-            };
-
-            axios.request(config)
-                .then((response) => {
-                    // console.log(JSON.stringify(response.data));
-                })
-                .catch((error) => {
-                    // console.log(error);
-                });
-
-        }
-    }, [])
-
-    const ArticleCard = ({ img, title, date, des }) => {
+    const ArticleCard = (img, title, date, des) => {
+        date = new Date(date).toString().split(" ")
         return (
             <div className="flex flex-col gap-3 xl:w-[400px] rounded-md p-2">
                 <div className="relative rounded-md w-full h-56 overflow-hidden bg-zinc-200">
@@ -56,7 +47,7 @@ export default function Dashboard({ data, }) {
                 </div>
                 <div className="flex flex-shrink flex-col gap-2">
                     {title ? <span className={`${jose.className} text-xl line-clamp-1 mt-2 px-1 leading-6`}>{title}</span> : <span className={`${jose.className} text-xl line-clamp-1 mt-2 px-1 leading-6`}>Title</span>}
-                    {date ? <span className={`text-zinc-300 font-semibold px-1 -translate-y-2`}>{date}</span> : <span className={`text-zinc-300 font-semibold px-1 -translate-y-2`}>1 January, 2077</span>}
+                    {date ? <span className={`text-zinc-300 font-semibold px-1 -translate-y-2`}>{date[1] + " " + date[2]}</span> : <span className={`text-zinc-300 font-semibold px-1 -translate-y-2`}>1 January, 2077</span>}
                     {des ? <p className="px-1 text-zinc-500 line-clamp-3">{des}</p> : <p className="px-1 text-zinc-500 line-clamp-3">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Vitae exercitationem molestias repellat ducimus! Quidem, fuga reiciendis sapiente voluptatum quibusdam repellendus. Ea et ratione possimus odio amet ducimus in officiis nisi!</p>}
                     <span className="p-1 flex gap-2">
                         <button className="rounded-md p-2 px-4 border-2 border-dashed border-zinc-800 group hover:bg-zinc-950 transition-all duration-200 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 group-hover:scale-105">
@@ -85,7 +76,7 @@ export default function Dashboard({ data, }) {
                 <div className="flex flex-1 max-xl:w-full flex-col items-start gap-4 py-9">
                     <div className="flex items-center justify-between w-full">
                         <section className="flex flex-col gap-1">
-                            <span className={`${jose.className} leading-6 xl:text-3xl text-2xl`}>Hey, {clientCookie?.name || "User"}</span>
+                            <span className={`${jose.className} leading-6 xl:text-3xl text-2xl`}>Hey, {userData?.name || "----"}</span>
                             <span className="text-zinc-500 w-2/3 leading-4 text-sm">Good to have you back, have a look here</span>
                         </section>
                         <section className="flex max-xl:flex-col gap-3">
@@ -106,7 +97,7 @@ export default function Dashboard({ data, }) {
                                     </svg>
                                 </span>
                                 <section className="flex flex-col items-center pt-3">
-                                    <span className={`${jose.className} leading-5 font-bold text-4xl`}>2.5k</span>
+                                    <span className={`${jose.className} leading-5 font-bold text-4xl`}>{userData?.visits || 0}</span>
                                     <span className="text-lime-500 text-opacity-80 font-semibold">visited</span>
                                 </section>
                             </div>
@@ -118,7 +109,7 @@ export default function Dashboard({ data, }) {
                                     </svg>
                                 </span>
                                 <section className="flex flex-col items-center pt-3">
-                                    <span className={`${jose.className} leading-5 font-bold text-4xl`}>250</span>
+                                    <span className={`${jose.className} leading-5 font-bold text-4xl`}>{userData?.followers.length || 0}</span>
                                     <span className="text-sky-500 text-opacity-80 font-semibold">followers</span>
                                 </section>
                             </div>
@@ -130,7 +121,7 @@ export default function Dashboard({ data, }) {
                                     </svg>
                                 </span>
                                 <section className="flex flex-col items-center pt-3">
-                                    <span className={`${jose.className} leading-5 font-bold text-4xl`}>122</span>
+                                    <span className={`${jose.className} leading-5 font-bold text-4xl`}>{userData?.comments || 0}</span>
                                     <span className="text-purple-500 text-opacity-80 font-semibold">comments</span>
                                 </section>
                             </div>
@@ -140,10 +131,10 @@ export default function Dashboard({ data, }) {
                     </div>
 
                     <span className="bg-zinc-200 w-full rounded-md p-1 flex max-xl:flex-col gap-1">
-                        <button className="bg-white w-full rounded-md flex gap-2 justify-center p-2 text-xl font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+                        <button className="bg-white w-full rounded-md flex gap-2 justify-center p-2 text-xl xl:font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg>Drafted Articles</button>
-                        <button className="bg-white w-full rounded-md flex gap-2 justify-center p-2 text-xl font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+                        <button className="bg-white w-full rounded-md flex gap-2 justify-center p-2 text-xl xl:font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                         </svg>Saved Articles</button>
                     </span>
@@ -151,16 +142,26 @@ export default function Dashboard({ data, }) {
                     <div className="flex flex-col gap-2 w-full">
                         <section className="flex justify-between">
                             <span className={`${jose.className} text-2xl`}>Published Articles</span>
-                            <button className="flex gap-1 items-center px-4 text-sm font-bold text-zinc-400">See More <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            {userData?.articles?.length > 4 ? <button className="flex gap-1 items-center px-4 text-sm font-bold text-zinc-400">See More <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            </button>
+                            </button> : <></>}
                         </section>
                         <section className="flex flex-wrap gap-2">
-                            <ArticleCard title={"5 Easy Ways to Boost Your Productivity at Work"} img={"https://images.unsplash.com/photo-1517838277536-f5f99be501cd?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8Z3ltfHx8fHx8MTY4OTcwMTQzOQ&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} des={"From effective time management techniques to optimizing your workspace, this article provides actionable tips to enhance your productivity and achieve your goals."} date={"20 June, 2023"} />
+                            {userData?.articles?.length > 0 ? userData.articles.map(e => {
+                                return (
+                                    ArticleCard(e.cover, e.title, e.createdAt, e.description)
+                                )
+                            }) : <div className="flex items-center justify-center bg-zinc-200/20 rounded-md w-full min-h-[300px]">
+                                <span className={`${jose.className} flex gap-2 text-lg text-zinc-600 px-2 py-1 rounded-md bg-slate-200 cursor-pointer`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                                </svg>Write New Articles</span>
+                            </div>}
+
+                            {/* <ArticleCard title={"5 Easy Ways to Boost Your Productivity at Work"} img={"https://images.unsplash.com/photo-1517838277536-f5f99be501cd?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8Z3ltfHx8fHx8MTY4OTcwMTQzOQ&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} des={"From effective time management techniques to optimizing your workspace, this article provides actionable tips to enhance your productivity and achieve your goals."} date={"20 June, 2023"} />
                             <ArticleCard title={"The Ultimate Guide to Sustainable Living: Small Changes, Big Impact"} des={"Dive into the world of sustainable living and learn how even small changes in your daily routine can have a significant impact on the environment."} date={"12 January, 2023"} img={"https://images.unsplash.com/photo-1555229055-d66cfe3781df?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8Y2hhbmdlfHx8fHx8MTY4OTcwMTY1Mg&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} />
                             <ArticleCard title={"Mastering the Basics of Photography: A Beginner's Guide"} des={"If you're new to photography, this beginner's guide is the perfect starting point.Learn the fundamentals necessary to capture stunning images and express your creative vision through photography."} date={"23 March, 2023"} img={"https://images.unsplash.com/photo-1493805503700-3219b693ffcc?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8cGhvdG9ncmFwaHl8fHx8fHwxNjg5NzAyMTc4&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} />
-                            <ArticleCard title={"Unveiling the Secrets of Successful Entrepreneurship"} des={"Embark on a journey into the world of entrepreneurship and uncover the essential secrets to building a thriving business.This article explores key strategies, such as effective networking and embracing failure as a learning opportunity."} date={"18 April, 2023"} img={"https://images.unsplash.com/photo-1632187526552-cad170cfd9ca?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8RW50cmVwcmVuZXVyc2hpcHx8fHx8fDE2ODk3MDI1ODE&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} />
+                            <ArticleCard title={"Unveiling the Secrets of Successful Entrepreneurship"} des={"Embark on a journey into the world of entrepreneurship and uncover the essential secrets to building a thriving business.This article explores key strategies, such as effective networking and embracing failure as a learning opportunity."} date={"18 April, 2023"} img={"https://images.unsplash.com/photo-1632187526552-cad170cfd9ca?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8RW50cmVwcmVuZXVyc2hpcHx8fHx8fDE2ODk3MDI1ODE&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} /> */}
                         </section>
                     </div>
                 </div>
@@ -169,7 +170,7 @@ export default function Dashboard({ data, }) {
                 {/* <div className="xl:border-l xl:py-9 xl:pl-9 min-h-screen xl:mr-0 xl:ml-auto flex flex-col gap-10">
 
                 </div> */}
-                {!serverCookie?.username ? <Unaccess /> : <></>}
+                {!serverCookie ? <Unaccess /> : <></>}
             </main>
         </>
     )

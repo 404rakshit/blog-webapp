@@ -20,9 +20,10 @@ router.post("/", async (req, res) => {
     // console.log(username, password);
     if (!username && !password)
       throw { status: 404, message: "Misiing Cridentials" };
-      // console.log(username,password)
+    // console.log(username,password)
     let user = await User.findOne({ username });
-    if (!user) throw { status: 404, message: "User doesn't exisits" };
+    if (!user) user = await User.findOne({email: username});
+    if (!user) throw { status: 404, message: "User doesn't exisits" }
     // console.log(user);
     if (!checkPassword(password, user?.password))
       throw { status: 403, message: "Wrong Password!" };
@@ -30,19 +31,12 @@ router.post("/", async (req, res) => {
       refreshToken: generateRefreshToken({ username: user.username }),
     });
     await token.save();
-    res.cookie(
-      "parallelVortex",
-      {
-        username: user.username,
-        token: token.refreshToken,
-      },
-      {
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      }
-    );
+    res.cookie("parallelVortex", token.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     res.cookie("parallel", generateAccessToken({ username: user.username }), {
       maxAge: 60 * 60 * 1000,
       httpOnly: true,
@@ -65,44 +59,44 @@ router.post("/", async (req, res) => {
 
 // res.header('Set-Cookie', 'cookieName=cookieValue; Path=/; Max-Age=3600');
 
-router.post("/", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    if (!username)
-      throw {
-        status: 404,
-        message: "Need an Username for the Authentication!",
-      };
-    if (!password)
-      throw { status: 403, message: "Need a Password for the Authorization!" };
+// router.post("/", async (req, res) => {
+//   try {
+//     const { username, password } = req.body;
+//     if (!username)
+//       throw {
+//         status: 404,
+//         message: "Need an Username for the Authentication!",
+//       };
+//     if (!password)
+//       throw { status: 403, message: "Need a Password for the Authorization!" };
 
-    const user = await User.findOne({ username });
-    if (!user?.username)
-      throw { status: 404, message: "User doesn't belong to us" };
-    if (!checkPassword(password, user?.password))
-      throw { status: 403, message: "Wrong Password!" };
+//     const user = await User.findOne({ username });
+//     if (!user?.username)
+//       throw { status: 404, message: "User doesn't belong to us" };
+//     if (!checkPassword(password, user?.password))
+//       throw { status: 403, message: "Wrong Password!" };
 
-    const token = new Token({
-      refreshToken: generateRefreshToken({ username: user.username }),
-    });
-    await token.save();
-    req.session.access = generateAccessToken({ username: user.username });
-    req.session.refresh = token.refreshToken;
-    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-    // res.cookie("access", generateAccessToken({ username: user.username }), {
-    //   expires: new Date(Date.now() + 900000),
-    //   httpOnly: true,
-    //   secure: true,
-    // });
-    // res.cookie("refresh", token.refreshToken, {
-    //   httpOnly: true,
-    //   secure: true,
-    // });
-    res.status(200).send(req.session);
-  } catch (err) {
-    res.status(err.status || 500).json(err.message);
-  }
-});
+//     const token = new Token({
+//       refreshToken: generateRefreshToken({ username: user.username }),
+//     });
+//     await token.save();
+//     req.session.access = generateAccessToken({ username: user.username });
+//     req.session.refresh = token.refreshToken;
+//     req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+//     // res.cookie("access", generateAccessToken({ username: user.username }), {
+//     //   expires: new Date(Date.now() + 900000),
+//     //   httpOnly: true,
+//     //   secure: true,
+//     // });
+//     // res.cookie("refresh", token.refreshToken, {
+//     //   httpOnly: true,
+//     //   secure: true,
+//     // });
+//     res.status(200).send(req.session);
+//   } catch (err) {
+//     res.status(err.status || 500).json(err.message);
+//   }
+// });
 
 router.post("/token", async (req, res) => {
   try {

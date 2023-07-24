@@ -63,19 +63,12 @@ router.post(
       // req.session.access = generateAccessToken({ username: user.username });
       // req.session.refesh = token.refreshToken;
       // req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-      res.cookie(
-        "parallelVortex",
-        {
-          username: user.username,
-          token: token.refreshToken,
-        },
-        {
-          maxAge: 30 * 24 * 60 * 60 * 1000,
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-        }
-      );
+      res.cookie("parallelVortex", token.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
       res.cookie("parallel", generateAccessToken({ username: user.username }), {
         maxAge: 60 * 60 * 1000,
         httpOnly: true,

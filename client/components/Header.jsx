@@ -35,12 +35,17 @@ export default function Header() {
                     </svg>
                 </span>
 
-                {profile ? <span className="rounded-full border border-zinc-600 p-[1px]">
+                {profile ? <span className="relative group rounded-full border border-zinc-600 p-[1px]">
                     <Link href={"/dashboard"}>
                         <div className="relative overflow-hidden h-8 w-8 rounded-full">
                             <Image loader={() => profile} src={profile} fill />
                         </div>
                     </Link>
+                    <div className="absolute max-xl:hidden pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-1 z-10 w-40 -left-14 bg-zinc-200 shadow-md rounded-md transition-all duration-200 translate-y-5 p-1">
+                        <Link href={"/logout"} className="bg-zinc-800 flex justify-center gap-2 hover:bg-zinc-900 transition-colors duration-150 text-white text-center font-semibold py-1 w-full rounded-md"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                        </svg>Logout</Link>
+                    </div>
                 </span> :
                     <svg onClick={() => {
                         unrevel()

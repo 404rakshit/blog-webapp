@@ -1,17 +1,19 @@
 const express = require("express");
 const Token = require("../../models/token");
+const { verifyRefreshToken } = require("../../middlewares/jwt");
 const router = express.Router();
 
 router.get("/", (req, res) => {
   res.send("Logout");
 });
 
-router.post("/", async (req, res) => {
+router.post("/", verifyRefreshToken, async (req, res) => {
   try {
-    if (!req?.cookies?.refresh) throw { status: 404, message: "Token Unavailable" };
-    Token.deleteOne({ refreshToken: req?.cookies?.refresh })
+    // if (req?.user?.parallelVortex) throw { status: 404, message: "Token Unavailable" };
+    // console.log(req.cookies)
+    Token.deleteOne({ refreshToken: req.headers["authorization"].split(" ")[1] })
       .then((response) => {
-        res.clearCookie("refresh")
+        // res.clearCookie("parallelVortex");
         res.status(200).send("Logged Out");
       })
       .catch((err) => {
