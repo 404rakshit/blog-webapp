@@ -5,7 +5,6 @@ import Unaccess from "@/components/Unaccess";
 import axios from "axios";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 // import { useCookies } from "react-cookie";
 

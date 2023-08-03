@@ -130,11 +130,11 @@ export default function Dashboard({ data, userData }) {
                         <span className="font-semibold text-zinc-400 text-opacity-50 text-sm">Click for more info</span>
                     </div>
 
-                    <span className="bg-zinc-200 w-full rounded-md p-1 flex max-xl:flex-col gap-1">
-                        <button className="bg-white w-full rounded-md flex gap-2 justify-center p-2 text-xl xl:font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+                    <span className="bg-zinc-200 w-full rounded-md p-1 flex gap-1">
+                        <Link href={"/draft"} className="bg-white w-full rounded-md flex gap-2 justify-center p-2 xl:text-xl font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 max-xl:hidden">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                        </svg>Drafted Articles</button>
-                        <button className="bg-white w-full rounded-md flex gap-2 justify-center p-2 text-xl xl:font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+                        </svg>Drafted Articles</Link>
+                        <button className="bg-white w-full rounded-md flex gap-2 justify-center p-2 xl:text-xl font-semibold text-zinc-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 max-xl:hidden">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                         </svg>Saved Articles</button>
                     </span>
@@ -157,11 +157,6 @@ export default function Dashboard({ data, userData }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                                 </svg>Write New Articles</span>
                             </div>}
-
-                            {/* <ArticleCard title={"5 Easy Ways to Boost Your Productivity at Work"} img={"https://images.unsplash.com/photo-1517838277536-f5f99be501cd?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8Z3ltfHx8fHx8MTY4OTcwMTQzOQ&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} des={"From effective time management techniques to optimizing your workspace, this article provides actionable tips to enhance your productivity and achieve your goals."} date={"20 June, 2023"} />
-                            <ArticleCard title={"The Ultimate Guide to Sustainable Living: Small Changes, Big Impact"} des={"Dive into the world of sustainable living and learn how even small changes in your daily routine can have a significant impact on the environment."} date={"12 January, 2023"} img={"https://images.unsplash.com/photo-1555229055-d66cfe3781df?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8Y2hhbmdlfHx8fHx8MTY4OTcwMTY1Mg&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} />
-                            <ArticleCard title={"Mastering the Basics of Photography: A Beginner's Guide"} des={"If you're new to photography, this beginner's guide is the perfect starting point.Learn the fundamentals necessary to capture stunning images and express your creative vision through photography."} date={"23 March, 2023"} img={"https://images.unsplash.com/photo-1493805503700-3219b693ffcc?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8cGhvdG9ncmFwaHl8fHx8fHwxNjg5NzAyMTc4&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} />
-                            <ArticleCard title={"Unveiling the Secrets of Successful Entrepreneurship"} des={"Embark on a journey into the world of entrepreneurship and uncover the essential secrets to building a thriving business.This article explores key strategies, such as effective networking and embracing failure as a learning opportunity."} date={"18 April, 2023"} img={"https://images.unsplash.com/photo-1632187526552-cad170cfd9ca?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=720&ixid=MnwxfDB8MXxyYW5kb218MHx8RW50cmVwcmVuZXVyc2hpcHx8fHx8fDE2ODk3MDI1ODE&ixlib=rb-4.0.3&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1280"} /> */}
                         </section>
                     </div>
                 </div>

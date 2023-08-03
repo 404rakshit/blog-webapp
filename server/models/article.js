@@ -11,9 +11,18 @@ const articleSchema = new Schema(
         message: "'{VALUE}' as a Title is too short!",
       },
     },
+    permalink: {
+      type: String,
+      required: [true, "Link is missing!"],
+      unique: true,
+      validate: {
+        validator: (permalink) => permalink.split("-").length > 2,
+        message: "'{VALUE}' as a Title is too short!",
+      },
+    },
     description: {
       type: String,
-      required: [true, "Dude Title is missing!"],
+      required: [true, "Dude description is missing!"],
     },
     cover: {
       type: String,
@@ -26,11 +35,22 @@ const articleSchema = new Schema(
         message: "Enough Tags!"
       }
     },
+    body: {
+      type: Array,
+      of: String,
+      required: [true, "Provide a body"]
+    },
     author: {
         type: Schema.Types.ObjectId,
         ref: 'user',
         required: [true, "Are ghost allowed to write articles. Need Humans asap."]
-    }
+    },
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "comment",
+      },
+    ],
   },
   { versionKey: false, timestamps: true }
 );

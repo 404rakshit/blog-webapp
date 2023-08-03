@@ -68,10 +68,22 @@ const userSchema = new Schema(
         max: 3
       }
     ],
+    draft: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "draft",
+      },
+    ],
     articles: [
       {
         type: Schema.Types.ObjectId,
         ref: "article",
+      },
+    ],
+    comments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "comment",
       },
     ],
   },

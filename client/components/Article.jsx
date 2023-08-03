@@ -28,10 +28,10 @@ export default function Article({ data }) {
 
             <section className="flex max-xl:flex-col-reverse gap-3 items-start justify-between">
                 <div className="flex flex-col py-3 gap-2 w-full xl:h-44 h-60">
-                    <div className="flex flex-1 flex-col gap-2 h-full">
+                    <Link href={`/user/${data?.author.username}/${data?.permalink}`} className="flex flex-1 flex-col gap-2 h-full">
                         {data?.title ? <h3 className={`${jose.className} text-2xl leading-7`}>{data.title}</h3> : <span className="h-10 w-96 animate-pulse bg-zinc-100 rounded-md"></span>}
-                        {data?.description ? <p className="text-zinc-400 text-sm line-clamp-3">{data.description}</p> : <><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span></>}
-                    </div>
+                        {data?.description ? <p className="text-zinc-600 line-clamp-3">{data.description}</p> : <><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span><span className="h-8 w-full animate-pulse bg-zinc-100 rounded-md"></span></>}
+                    </Link>
 
                     <div className="flex justify-between items-center pt-6">
                         <section className="flex gap-3">
@@ -53,7 +53,8 @@ export default function Article({ data }) {
                     </div>
                 </div>
 
-                {data?.cover ? <div className="flex-shrink-0 relative xl:h-48 h-60 w-80 rounded-lg max-xl:w-full overflow-hidden my-auto"><Image loader={() => data.cover} src={data.cover} fill className="rounded-lg xl:hover:scale-110 transition-all duration-200 cursor-pointer object-cover max-xl:w-full" /> </div> : <div className="h-40 w-72 max-xl:w-full max-xl:h-80 bg-zinc-100 rounded-lg animate-pulse"></div>}
+
+                {data?.cover ? <div className="flex-shrink-0 relative xl:h-48 h-60 w-80 rounded-lg max-xl:w-full overflow-hidden my-auto"><Link href={`/user/${data?.author.username}/${data?.permalink}`}><Image loader={() => data.cover} src={data.cover} fill className="rounded-lg xl:hover:scale-110 transition-all duration-200 cursor-pointer object-cover max-xl:w-full" /></Link></div> : <div className="h-40 w-72 max-xl:w-full max-xl:h-80 bg-zinc-100 rounded-lg animate-pulse"></div>}
 
             </section>
 
