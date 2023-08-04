@@ -77,7 +77,7 @@ export default function User({ data }) {
                     </div>
                     {data.articles?.length > 0 ? data.articles.map(e => {
                         return (
-                            <ArticleCard key={e._id} title={e.title} des={e.description} img={e.cover} date={e.createdAt} />
+                            <ArticleCard key={e._id} title={e.title} des={e.description} img={e.cover} date={e.createdAt} link={`/user/${data.username}/${e.permalink}`}/>
                         )
                     }) : <div className="flex items-center justify-center bg-zinc-200/20 rounded-md w-full min-h-[300px]">
                         <span className={`${jose.className} flex gap-2 text-lg text-zinc-600 px-2 py-1 rounded-md bg-slate-200`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">

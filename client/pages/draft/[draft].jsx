@@ -1,5 +1,6 @@
 import { jose } from "@/components/Fonts"
 import { popUp } from "@/components/Modal";
+import { success } from "@/components/Publish";
 import Unaccess from "@/components/Unaccess";
 import axios from "axios";
 import Head from "next/head"
@@ -32,8 +33,6 @@ export default function Editdraft({ id, data, cookies }) {
     const [title, setTitle] = useState(data?.title)
     const [cover, setCover] = useState(data?.cover)
     const [des, setDes] = useState(data?.description)
-
-
 
     useEffect(() => {
         if (data?.message) window.location.replace("/write-new")
@@ -122,6 +121,41 @@ export default function Editdraft({ id, data, cookies }) {
         })
     }
 
+    function publishIt() {
+        let body = []
+        Array.from(document.getElementById("edit").children).map(e => {
+            body.push(e.outerHTML);
+        })
+
+        if (!title) return popUp("Title Missing"), document.getElementById("publishBtn").disabled = false
+        if (!cover) return popUp("Cover Missing"), document.getElementById("publishBtn").disabled = false
+        if (!des) return popUp("Description Missing"), document.getElementById("publishBtn").disabled = false
+        if (body.length < 2) return popUp("Body Too Short"), document.getElementById("publishBtn").disabled = false
+
+        let tags = [document.getElementById("tags").value.split(",")[0], document.getElementById("tags").value.split(",")[1], document.getElementById("tags").value.split(",")[2]]
+
+        let permalink = title.split(" ").join("-").toLocaleLowerCase()
+
+        // console.log(title, cover, des, body, encodeURIComponent(permalink), tags);
+
+        axios.request({
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${process.env.SERVER_URL}/article`,
+            headers: {
+                'Authorization': `Bearer ${serverCookie}`,
+            },
+            data: {
+                title, cover, description: des, body, permalink: encodeURIComponent(permalink), tags, draftId: id
+            }
+        }).then(res => {
+            success(res.data.title, res.data.link, res.data.cover, res.data.description)
+        }).catch(err => {
+            popUp(err.message + " " + err?.response?.data?.message)
+            document.getElementById("publishBtn").disabled = false
+        })
+    }
+
     return (
         <>
             <Head>
@@ -162,7 +196,7 @@ export default function Editdraft({ id, data, cookies }) {
                             {cover ? <Image id="cover" className="object-cover" loader={() => cover} src={cover} fill /> : <></>}
                             <span className="absolute top-1/2 left-1/2 -translate-x-10 -translate-y-5 text-sm font-semibold uppercase opacity-40">Add Image</span>
                         </div>
-                        <textarea onChange={(e) => {
+                        <textarea id="des" onChange={(e) => {
                             setDes(e.target.value)
                         }} placeholder="Write description" className="flex-1 outline-none border-l-4 shadow resize-none p-1" value={des}></textarea>
                     </div>
@@ -221,6 +255,11 @@ export default function Editdraft({ id, data, cookies }) {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                         </svg>
                     </button>
+                    <button id="hiddenBtn" onPointerDown={(e) => {
+                        e.preventDefault()
+                    }} onClick={() => {
+                        publishIt()
+                    }} className="rounded shadow hidden items-center justify-center lg:hover:bg-slate-950 cursor-pointer bg-zinc-900 h-12 w-full">P</button>
                 </div>
 
                 {/* Unsplash Image Modal */}

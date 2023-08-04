@@ -57,7 +57,7 @@ router.get("/:username/:articleLink", async (req, res) => {
     );
     if (!user) throw { status: 404, message: "User doesn't exists" };
     let article = await Article.findOne({
-      permalink: req.params.articleLink,
+      permalink: encodeURIComponent(req.params.articleLink),
     })
       .populate("author", ["name", "username", "profile"])
       .populate({
@@ -67,8 +67,8 @@ router.get("/:username/:articleLink", async (req, res) => {
           model: "user",
         },
       });
-    if (!user.equals(article?.author))
-      throw { status: 404, message: "Article doesn't exists" };
+    // if (!user.equals(article?.author))
+    //   throw { status: 404, message: "Article doesn't exists" };
     res.status(200).json(article);
   } catch (err) {
     res
@@ -77,23 +77,65 @@ router.get("/:username/:articleLink", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", verifyRefreshToken, async (req, res) => {
   try {
-    const newArticle = new Article({
-      title: req.body.title,
-      description: req.body.description,
-      cover: req.body.cover,
-      tags: req.body.tags,
-      author: req.cookies.userId ? { _id: req.cookies.userId } : null,
+    const { title, cover, permalink, description, body, tags, draftId } =
+      req.body;
+    let user = await User.findOne({ username: req.user.username });
+    if (!user) throw { status: 404, message: "User doesn't exists" };
+    if (draftId) await Draft.findByIdAndDelete({ _id: draftId });
+    let newArticle = new Article({
+      title,
+      description,
+      cover,
+      permalink,
+      body,
+      tags,
+      author: user._id,
     });
-    const data = await newArticle.save();
-    const user = await User.findOneAndUpdate(
-      { _id: req.cookies.userId },
-      { $push: { articles: data._id } }
+    await User.findOneAndUpdate(
+      { username: req.user.username },
+      {
+        $push: { articles: newArticle._id },
+      }
     );
-    res.status(201).json(data);
+    const data = await newArticle.save();
+    res.status(201).json({
+      title: data.title,
+      cover: data.cover,
+      link: `/user/${user.username}/${data.permalink}`,
+      description: data.description,
+    });
   } catch (err) {
-    res.status(404).send(err);
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
+router.delete("/:id", verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    let user = await User.findOne({ username: req.user.username });
+    if (!user) throw { status: 404, message: "User doesn't exists" };
+    let article = await Article.findById(id);
+    if (!article) throw { status: 404, message: "Article Not Found" };
+    let newDraft = new Draft({
+      title: article.title,
+      description: article.description,
+      cover: article.cover,
+      body: article.body,
+      author: article.author,
+      comments: article.comments,
+    });
+    await newDraft.save();
+    await Article.findByIdAndDelete(article._id);
+    await User.findByIdAndUpdate(user._id, { $pull: { articles: id } });
+    res.status(200).json({ message: "Shifted to Draft" });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
   }
 });
 

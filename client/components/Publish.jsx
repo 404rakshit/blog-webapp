@@ -1,5 +1,4 @@
 import { jose } from "./Fonts";
-import { popUp } from "./Modal";
 
 export function publishModal(msg) {
     document.getElementById("publishBg").classList.replace("opacity-0", "opacity-100")
@@ -7,17 +6,27 @@ export function publishModal(msg) {
     document.getElementById("publish").classList.remove("scale-0")
 }
 
-export default function Publish() {
+export function success(title, link, cover, des) {
 
-    function success(title, link){
-        document.getElementById('publish').innerHTML = `<span class="relative text-xl text-center bg-lime-200 text-lime-600 py-2 w-full rounded-lg"}>Article Uploaded!</span>
-        <span class="text-lg flex items-center gap-2">Visit: <a class="px-2 border bg-blue-200 rounded-full max-w-sm line-clamp-1" href=${link}>${title}</a></span>
-        section`
-    }
+    document.getElementById('publish').innerHTML = `<span class="relative text-xl text-center bg-lime-200 text-lime-600 py-2 w-full rounded-lg"}>Article Uploaded!</span>
+    <a href=${link} class="rounded-md max-w-md overflow-hidden flex gap-5 border border-zinc-300 shadow-md">
+    <img class="object-cover h-20 w-1/4 bg-zinc-200" src=${cover} />
+    <section class="flex flex-col p-1">
+    <label class="text-lg line-clamp-1">${title}</label>
+    <p class="text-zinc-600 text-sm line-clamp-2 leading-4">${des}</p>
+    </section>
+    </a>
+    <section class="flex gap-2 items-start text-xl">Share: 
+    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img class="h-5 w-5" src="/inico.svg" /></a>
+    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img class="h-5 w-5 translate-y-0.5" src="/telegramico.svg" /></a>
+    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img class="h-5 w-5 translate-y-0.5" src="/twitterico.svg" /></a></section>`
+}
+
+export default function Publish() {
 
     return (
         <div id="publishBg" className="fixed flex items-center justify-center z-30 min-h-[100svh] min-w-[100svw] bg-black bg-opacity-50 transition-all duration-200 opacity-0 pointer-events-none">
-            <div id="publish" className={`${jose.className} flex flex-col items-center gap-4 p-3 min-h-[15rem] xl:w-[500px] w-[90svw] bg-white rounded-lg shadow-[rgba(0,_0,_0,_0.75_0px_10px_15px] transition-all duration-500 scale-0`}>
+            <div id="publish" className={`${jose.className} flex flex-col items-center gap-4 p-3 lg:w-[500px] w-[90svw] bg-white rounded-lg shadow-[rgba(0,_0,_0,_0.75_0px_10px_15px] transition-all duration-500 scale-0`}>
                 <span className={`${jose.className} relative text-xl text-center bg-lime-200 py-2 w-full rounded-lg`}>Upload Article
                     <button onClick={(e) => {
                         document.getElementById("publishBg").classList.replace("opacity-100", "opacity-0")
@@ -31,7 +40,7 @@ export default function Publish() {
                 </span>
                 <div className="pt-3 flex items-center gap-2">
                     <label className={`${jose.className} text-xl leading-none`}>Tags: </label>
-                    <input onKeyUp={(e) => {
+                    <input id="tags" onKeyUp={(e) => {
                         if (e.keyCode < 65 && e.keyCode > 90) e.isDefaultPrevented()
                     }} onPaste={(e) => e.preventDefault()} className={`${jose.className} border-b border-zinc-400 px-1`} type="text" placeholder="e.g. UI, UX, Web" maxLength={70} />
                 </div>
@@ -41,15 +50,9 @@ export default function Publish() {
                     <li className="list-item">Description must be provided</li>
                     <li className="list-item">Article must contain a body</li>
                 </ol>
-                <button onClick={(e)=>{
-                    e.target.innerText = "Publishing..."
+                <button id="publishBtn" onClick={(e) => {
                     e.target.disabled = true
-                    setTimeout(() => {
-                        // popUp("Article Not Published")
-                        // e.target.innerText = "Publish"
-                        // e.target.disabled = false
-                        success("This is a title asd asdasjbdhsha","https://google.com/")
-                    }, 2000);
+                    document.getElementById("hiddenBtn")?.click()
                 }} className={`${jose.className} rounded-full bg-zinc-900 py-1 px-8 text-white transition-all duration-300 disabled:animate-pulse disabled:cursor-not-allowed`}>Publish</button>
             </div>
         </div>
