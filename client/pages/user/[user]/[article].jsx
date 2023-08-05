@@ -1,6 +1,7 @@
 import { jose, poppins } from "@/components/Fonts";
 import { popUp } from "@/components/Modal";
 import { Refesh } from "@/components/Refesh";
+import { unrevel } from "@/components/UserLog";
 import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
@@ -28,16 +29,16 @@ export default function Articles({ data, cookies, }) {
     Refesh(cookies?.parallelVortex, cookies?.parallel)
 
     useEffect(() => {
-        document.getElementById("container").innerHTML = data?.body.join("")
-        console.log(data);
+        if (data) document.getElementById("container").innerHTML = data?.body.join("")
     }, [])
 
     let date = new Date(data?.createdAt || "2012").toString().split(" ")
 
     const [comments, setComments] = useState(data?.comments || [])
+    const [likes, setLikes] = useState(data?.likes?.length || 0)
+    const [liked, setLiked] = useState(data?.likes?.includes(clientCookie?.username))
 
     function commentIt(review, article) {
-        console.log(review);
         document.getElementById("commentor").disabled = true
         document.getElementById("commentInput").disabled = true
 
@@ -52,7 +53,6 @@ export default function Articles({ data, cookies, }) {
                 review, article
             }
         }).then(res => {
-            console.log(res);
             setComments([...comments, res.data])
             document.getElementById("commentor").disabled = false
             document.getElementById("commentInput").value = null
@@ -63,10 +63,35 @@ export default function Articles({ data, cookies, }) {
             document.getElementById("commentInput").disabled = false
         })
     }
-    return (
+
+    function like() {
+        if (!data?._id) return null
+
+        if (!clientCookie) return unrevel()
+
+        document.getElementById('like').disabled = true
+
+        axios.request({
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${process.env.SERVER_URL}/article/like/${data?._id}`,
+            headers: {
+                'Authorization': `Bearer ${cookies?.parallel}`,
+            }
+        }).then(res => {
+            setLiked(!liked)
+            res.data.state ? setLikes(likes + 1) : setLikes(likes - 1)
+            document.getElementById('like').disabled = false
+        }).catch(err => {
+            popUp(err.message + " " + err?.response?.data.message)
+            document.getElementById('like').disabled = false
+        })
+    }
+
+    return data ? (
         <>
             <Head>
-                <title>{data?.title ? `${data.title} - Reader` : "Article Not Found"}</title>
+                <title>{data.title} - Reader</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </Head>
             <main className={`flex justify-center min-h-[90svh] px-4 xl:px-16`}>
@@ -96,17 +121,17 @@ export default function Articles({ data, cookies, }) {
                         <Image className="object-cover" loader={() => data?.cover} src={data?.cover} fill />
                     </div>
                     <div className="flex justify-between px-2 py-1 w-full">
-                        <span className="flex gap-2 items-center">
-                            <button>
-                                <svg onClick={(e) => {
-                                    e.target.classList.add("fill-red-600", "stroke-red-600")
-                                    e.target.classList.remove("stroke-zinc-700")
-                                }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 xl:hover:scale-110 transition-all duration-300 cursor-pointer stroke-zinc-700">
+                        <form onSubmit={(e) => {
+                            e.preventDefault()
+                            like()
+                        }} className="flex gap-2 items-center">
+                            <button className="disabled:opacity-30" id="like" type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-6 h-6 lg:hover:scale-110 transition-colors duration-300 cursor-pointer ${liked ? "fill-red-500 stroke-red-500" : "stroke-zinc-700"}`}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                                 </svg>
                             </button>
-                            <span className={`${jose.className} leading-none text-zinc-500`}>0</span>
-                        </span>
+                            <span className={`${jose.className} leading-none text-zinc-500`}>{likes}</span>
+                        </form>
                         <span className="flex gap-2 items-center">
                             <button>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 xl:hover:scale-110 transition-all duration-300 cursor-pointer stroke-zinc-700">
@@ -140,21 +165,33 @@ export default function Articles({ data, cookies, }) {
 
                         {serverCookie ? <form onSubmit={(e) => {
                             e.preventDefault()
-                            console.log(e.target.children[0].value, data?._id);
                             commentIt(e.target.children[0].value, data?._id)
                         }} className="flex gap-2">
                             <input autoComplete="off" id="commentInput" placeholder="Write your reviews..." className={`${poppins.className} bg-zinc-100 rounded-md flex-1 px-4 py-2 outline-none text-lg" type="text`} maxLength={200} />
                             <button id="commentor" className={`${jose.className} px-5 py-1 rounded-md bg-zinc-900 disabled:opacity-40 text-white`}>Send</button>
                         </form> : <div className="flex gap-2">
-                            <input autoComplete="off" id="commentInput" placeholder="Login for writing a review" className={`${poppins.className} disabled:opacity-50 bg-zinc-100 rounded-md flex-1 px-4 py-2 outline-none text-lg" type="text`} maxLength={200} disabled />
-                            <button id="commentor" className={`${jose.className} px-5 py-1 rounded-md bg-zinc-900 disabled:opacity-40 text-white`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                            </svg></button>
+                            <input autoComplete="off" placeholder="Login for writing a review" className={`${poppins.className} disabled:opacity-50 bg-zinc-100 rounded-md flex-1 px-4 py-2 outline-none text-lg" type="text`} maxLength={200} disabled />
+                            <button onClick={() => {
+                                unrevel()
+                            }} className={`${jose.className} px-5 py-1 rounded-md bg-zinc-900 disabled:opacity-40 text-white`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                </svg></button>
                         </div>}
 
                     </div>
                 </div>
             </main>
         </>
-    );
+    ) : (<>
+        <Head>
+            <title>Article Not Found</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        </Head>
+        <main className={`flex flex-col gap-1 items-center justify-center min-h-[90svh] px-4 xl:px-16`}>
+            <span className="relative h-60 w-60 overflow-hidden">
+                <Image src={"/404.jpg"} className="object-cover" fill />
+            </span>
+            <span className={`${jose.className} text-xl`}>Oops.. Seems like article has been taken down</span>
+        </main>
+    </>)
 }

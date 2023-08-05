@@ -32,18 +32,21 @@ const articleSchema = new Schema(
       of: String,
       validate: {
         validator: (tags) => tags.length < 4,
-        message: "Enough Tags!"
-      }
+        message: "Enough Tags!",
+      },
     },
     body: {
       type: Array,
       of: String,
-      required: [true, "Provide a body"]
+      required: [true, "Provide a body"],
     },
     author: {
-        type: Schema.Types.ObjectId,
-        ref: 'user',
-        required: [true, "Are ghost allowed to write articles. Need Humans asap."]
+      type: Schema.Types.ObjectId,
+      ref: "user",
+      required: [
+        true,
+        "Are ghost allowed to write articles. Need Humans asap.",
+      ],
     },
     comments: [
       {
@@ -51,9 +54,21 @@ const articleSchema = new Schema(
         ref: "comment",
       },
     ],
+    likes: [
+      {
+        type: Schema.Types.String,
+        ref: "user",
+        unique: true
+      },
+    ],
   },
   { versionKey: false, timestamps: true }
 );
+
+articleSchema.virtual('likeCount').get(function(){
+  // console.log('Run the console')
+  return this.likes.length
+})
 
 const Article = mongoose.model("article", articleSchema);
 

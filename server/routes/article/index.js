@@ -204,6 +204,40 @@ router.post("/draft", verifyRefreshToken, async (req, res) => {
 //   }
 // })
 
+router.post("/like/:id", verifyToken, async (req, res) => {
+  try {
+    const { username } = req.user;
+    const { id } = req.params;
+    if (!id) throw { status: 404, message: "Provide Id" };
+    let user = await User.findOne({ username });
+    if (!user) throw { status: 404, message: "User doesn't Exists" };
+    let article = await Article.find({
+      _id: id,
+      likes: { $eq: user.username },
+    }).count();
+    let response;
+    // if (!article) throw { status: 404, message: "Article doesn't Exists" };
+    // let data = await Article.findByIdAndUpdate(id, { $push: { likes: user._id } });
+    // let data2 = await User.findByIdAndUpdate(user._id, { $push: { liked: article._id } });
+    article
+      ? (await Article.findByIdAndUpdate(id, { $pull: { likes: user.username } }),
+        await User.findByIdAndUpdate(user._id, {
+          $pull: { liked: article._id },
+        }),
+        (response = "Unliked"))
+      : (await Article.findByIdAndUpdate(id, { $push: { likes: user.username } }),
+        await User.findByIdAndUpdate(user._id, {
+          $push: { liked: article._id },
+        }),
+        (response = "Liked"));
+    res.status(200).json({ message: response, state: !article });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
 router.post("/comment", verifyToken, async (req, res) => {
   try {
     const { review, article } = req.body;

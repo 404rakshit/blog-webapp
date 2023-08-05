@@ -54,19 +54,19 @@ const userSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "user",
-      }
+      },
     ],
     following: [
       {
         type: Schema.Types.ObjectId,
         ref: "user",
-      }
+      },
     ],
     socials: [
       {
         type: String,
-        max: 3
-      }
+        max: 3,
+      },
     ],
     draft: [
       {
@@ -84,6 +84,13 @@ const userSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "comment",
+      },
+    ],
+    liked: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "article",
+        unique: true,
       },
     ],
   },

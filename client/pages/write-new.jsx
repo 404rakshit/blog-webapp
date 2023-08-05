@@ -294,10 +294,10 @@ export default function Writenew({ cookies, }) {
 
                         }} className="flex gap-1 bg-zinc-400/40 p-1 rounded-md">
                             <input id="unsplash" onKeyDown={(event) => {
-                                let key = event.keyCode;
-                                if (key === 32) {
-                                    event.preventDefault();
-                                }
+                                // let key = event.keyCode;
+                                // if (key === 32) {
+                                //     event.preventDefault();
+                                // }
                             }} className="bg-slate-50 rounded-md h-10 max-lg:w-[70svw] w-[450px] outline-none px-2" type="text" maxLength={20} autoComplete="off" />
                             <button className={`${jose.className} bg-zinc-800/90 disabled:opacity-50 px-3 text-white rounded-md`} >Search</button>
                         </form>

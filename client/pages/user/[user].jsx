@@ -73,17 +73,16 @@ export default function User({ data }) {
                 <div className="flex w-full flex-col py-2 px-4 xl:px-16 gap-3 min-h-[100px]">
                     <span className={`${jose.className} text-2xl xl:text-3xl`}>Published Articles</span>
                     <div className="flex flex-wrap w-full max-xl:flex-col">
-
+                        {data.articles?.length > 0 ? data.articles.map(e => {
+                            return (
+                                <ArticleCard key={e._id} title={e.title} des={e.description} img={e.cover} date={e.createdAt} link={`/user/${data.username}/${e.permalink}`} />
+                            )
+                        }) : <div className="flex items-center justify-center bg-zinc-200/20 rounded-md w-full min-h-[300px]">
+                            <span className={`${jose.className} flex gap-2 text-lg text-zinc-600 px-2 py-1 rounded-md bg-slate-200`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                            </svg>No Article Yet</span>
+                        </div>}
                     </div>
-                    {data.articles?.length > 0 ? data.articles.map(e => {
-                        return (
-                            <ArticleCard key={e._id} title={e.title} des={e.description} img={e.cover} date={e.createdAt} link={`/user/${data.username}/${e.permalink}`}/>
-                        )
-                    }) : <div className="flex items-center justify-center bg-zinc-200/20 rounded-md w-full min-h-[300px]">
-                        <span className={`${jose.className} flex gap-2 text-lg text-zinc-600 px-2 py-1 rounded-md bg-slate-200`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-                        </svg>No Article Yet</span>
-                    </div>}
                 </div>
 
             </main>

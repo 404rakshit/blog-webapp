@@ -26,6 +26,13 @@ input::-webkit-file-upload-button {
   transition: all 200ms ease-in-out;
 }
 
+#container a {
+  text-decoration-line: underline;
+  text-decoration-color: dodgerblue;
+  text-underline-offset: 4px;
+  transition: all 200ms ease-in-out;
+}
+
 * {
   outline: 2px solid transparent;
   outline-offset: 2px;

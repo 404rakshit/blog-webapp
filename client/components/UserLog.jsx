@@ -27,7 +27,7 @@ export default function UserLog({ state }) {
         <div id="model" className="fixed opacity-0 pointer-events-none z-20 bg-white bg-opacity-100 min-h-screen w-screen transition-opacity duration-300">
 
             {form ?
-                <div className="flex flex-col gap-5 items-center pt-20">
+                <div className="flex flex-col gap-5 items-center pt-20 max-xl:pt-20">
                     <h3 className={`${jose.className} text-4xl py-3 max-lg:py-10`}>Log In Here.</h3>
 
                     {/* Log In with Google */}
@@ -105,7 +105,7 @@ export default function UserLog({ state }) {
 
                     <button onClick={() => {
                         revel()
-                    }} className="absolute right-5 top-5 group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 lg:group-hover:scale-125 transition-all duration-200 ">
+                    }} className="absolute right-5 top-20 group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 lg:group-hover:scale-125 transition-all duration-200 ">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -201,7 +201,7 @@ export default function UserLog({ state }) {
 
                     <button onClick={() => {
                         revel()
-                    }} className="absolute right-5 top-5 group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 lg:group-hover:scale-125 transition-all duration-200 ">
+                    }} className="absolute right-5 top-20 group"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 lg:group-hover:scale-125 transition-all duration-200 ">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
