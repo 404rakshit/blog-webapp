@@ -17,9 +17,8 @@ export function success(title, link, cover, des) {
     </section>
     </a>
     <section class="flex gap-2 items-start text-xl">Share: 
-    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img class="h-5 w-5" src="/inico.svg" /></a>
-    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img class="h-5 w-5 translate-y-0.5" src="/telegramico.svg" /></a>
-    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img class="h-5 w-5 translate-y-0.5" src="/twitterico.svg" /></a></section>`
+    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img src="/twitter.svg" class="h-5 w-5 opacity-50 max-xl:translate-y-1" /></a>
+    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img src="/linkedin.svg" class="h-5 w-5 opacity-50 xl:-translate-y-1" /></a>`
 }
 
 export default function Publish() {

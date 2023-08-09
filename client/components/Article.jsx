@@ -6,7 +6,7 @@ export default function Article({ data }) {
     let date = new Date(data?.createdAt || "2012").toString().split(" ")
     return (
         <div className="border-t border-zinc-300 flex flex-col gap-4 py-5 w-full">
-            <div className="flex justify-between items-center">
+            <div className="relative flex justify-between items-center">
                 <section className="flex gap-2">
                     {data?.author.profile ? <Link href={`/user/${data?.author.username}`}><Image loader={() => data.author.profile} src={data.author.profile} className="rounded-full object-cover" width={55} height={55} /></Link> : <span className="h-14 w-14 animate-pulse bg-zinc-100 rounded-full"></span>}
                     <section className="flex justify-center flex-col p-1">
@@ -18,12 +18,32 @@ export default function Article({ data }) {
                     </section>
                 </section>
 
-                <span className="p-0.5 rounded-full opacity-70 h-fit transition-all duration-200 xl:hover:opacity-100 xl:hover:bg-zinc-200 cursor-pointer">
+                <span onClick={(e) => {
+                    e.currentTarget.parentElement.children[2].classList.replace('opacity-0', 'opacity-100')
+                    e.currentTarget.parentElement.children[2].classList.remove('pointer-events-none')
+                }} className="p-0.5 rounded-full opacity-70 h-fit transition-all duration-200 xl:hover:opacity-100 xl:hover:bg-zinc-200 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                     </svg>
                 </span>
 
+                <div onMouseLeave={(e) => {
+                    e.target.classList.replace('opacity-100', 'opacity-0')
+                    e.target.classList.add('pointer-events-none')
+                }} className="absolute z-30 right-7 top-10 min-h-[5rem] w-40 bg-white rounded-md border transiot duration-200 pointer-events-none opacity-0 flex flex-col p-1 gap-1">
+                    <button onClick={(e)=>{
+                        e.currentTarget.parentElement.classList.replace('opacity-100', 'opacity-0')
+                        e.currentTarget.parentElement.classList.add('pointer-events-none')
+                    }} className="flex flex-1 justify-center p-1 rounded-md bg-zinc-100 gap-2 cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                    </svg> Share</button>
+                    <button onClick={(e)=>{
+                        e.currentTarget.parentElement.classList.replace('opacity-100', 'opacity-0')
+                        e.currentTarget.parentElement.classList.add('pointer-events-none')
+                    }} className="flex flex-1 justify-center p-1 rounded-md bg-zinc-100 gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg> Report</button>
+                </div>
             </div>
 
             <section className="flex max-xl:flex-col-reverse gap-3 items-start justify-between">
@@ -37,19 +57,6 @@ export default function Article({ data }) {
                         <section className="flex gap-3">
                             {data?.tags ? <><span className="rounded-full bg-zinc-100 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-200 xl:hover:text-zinc-400 text-zinc-400 font-medium">{data?.tags[0]}</span><span className="rounded-full bg-zinc-100 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-200 xl:hover:text-zinc-400 text-zinc-400 font-medium">3 min read</span></> : <><span className="rounded-full bg-zinc-100 px-5 py-3 w-28 animate-pulse"></span><span className="rounded-full bg-zinc-100 px-5 py-3 w-28 h-10 animate-pulse"></span></>}
                         </section>
-
-                        <span className="flex gap-2">
-                            <span className="p-1 opacity-30 h-fit transition-all duration-200 xl:hover:opacity-70 group cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-7 h-7 xl:group-hover:scale-105 transition-all duration-300">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                                </svg>
-                            </span>
-                            <span className="p-1 opacity-30 h-fit transition-all duration-200 xl:hover:opacity-70 group cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-7 h-7 xl:group-hover:scale-105 transition-all duration-300">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </span>
-                        </span>
                     </div>
                 </div>
 

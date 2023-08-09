@@ -1,24 +1,33 @@
 import Article from "@/components/Article";
 import { jose } from "@/components/Fonts";
+import { Refesh } from "@/components/Refesh";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import { motion as m } from "framer-motion"
 
 export async function getServerSideProps(ctx) {
 
-  const data = await fetch(`${process.env.SERVER_URL}/article`).then(res => res.json())
+  const data = await fetch(`${process.env.SERVER_URL}/article?limit=5`).then(res => res.json())
+  const latestData = await fetch(`${process.env.SERVER_URL}/article/latest`).then(res => res.json())
   const people = await fetch(`${process.env.SERVER_URL}/user?limit=3`).then(res => res.json())
 
   return {
     props: {
       data,
       people,
+      latestData,
       cookies: ctx.req.cookies,
     }
   }
 }
 
-export default function Home({ data, people }) {
+export default function Home({ data, people, cookies, latestData }) {
+  let clientCookie = cookies?.data
+  let serverCookie = cookies?.parallelVortex
+  if (clientCookie) clientCookie = JSON.parse(cookies?.data)
+
+  Refesh(cookies?.parallelVortex, cookies?.parallel)
 
   return (
     <>
@@ -26,7 +35,12 @@ export default function Home({ data, people }) {
         <title>Reader - A place for ideas and wisdom</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <main className={`flex max-xl:flex-col  xl:items-start min-h-[90svh] px-4 xl:px-16`}>
+      <m.main
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        initial={{ opacity: 0 }}
+        transition={{ duration: 0.75, ease: "easeOut" }}
+        className={`flex max-xl:flex-col  xl:items-start min-h-[90svh] px-4 xl:px-16`}>
 
         {/* Left Hand Side */}
         <div className="flex flex-1 max-xl:w-full flex-col items-start gap-4 py-9 xl:pr-7 ">
@@ -97,9 +111,28 @@ export default function Home({ data, people }) {
                   </section>
                 </span>
 
-                <span className={` ${jose.className} h-fit flex gap-1 items-center rounded-full border px-5 py-3 text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-100 font-medium leading-3`}>Follow</span>
+                <span className={` ${jose.className} h-fit flex gap-1 items-center rounded-full border px-5 py-3 text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-100 font-medium leading-3`}>View</span>
 
               </Link>)
+            }) : <></>}
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <label className={`${jose.className} text-2xl my-2`}>Latest Posts</label>
+
+            {latestData ? latestData.map(e => {
+              let date = new Date(e?.createdAt || "2012").toString().split(" ")
+              return (<Link href={`/user/${e?.author.username}/${e.permalink}`}><div className="lg:hover:-translate-y-0.5 transition-all duration-200 flex gap-2 lg:max-w-sm ">
+                <div className="relative shrink-0 shadow-md w-36 h-36 rounded-md overflow-hidden bg-zinc-100">
+                  <Image className="object-cover flex-1" loader={() => e?.cover} src={e?.cover} fill />
+                </div>
+                <section className="flex flex-col">
+                  <span className={`${jose.className} text-xl line-clamp-2 leading-6`}>{e.title}</span>
+                  <span className={`${jose.className} text-sm text-zinc-500`}>{`${date[1]} ${date[2]}`}</span>
+                  <p className={`line-clamp-2`}>{e.description}</p>
+                  <span className="py-1 flex gap-1 text-zinc-600 text-sm font-semibold"><Image loader={() => e.author.profile} src={e.author.profile} className="rounded-full object-cover" width={20} height={20} /> {e.author.name}</span>
+                </section>
+              </div></Link>)
             }) : <></>}
           </div>
 
@@ -111,7 +144,7 @@ export default function Home({ data, people }) {
 
         </div>
 
-      </main>
+      </m.main>
     </>
   )
 }

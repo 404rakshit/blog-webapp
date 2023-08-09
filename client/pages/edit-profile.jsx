@@ -3,6 +3,7 @@ import { popUp } from "@/components/Modal";
 import { Refesh } from "@/components/Refesh";
 import Unaccess from "@/components/Unaccess";
 import axios from "axios";
+import { motion as m } from "framer-motion";
 import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -63,7 +64,11 @@ export default function Edit({ data, userData }) {
                 <title>Edit Profile</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </Head>
-            <main className={`relative flex max-xl:flex-col  xl:items-start min-h-[90svh] px-4 xl:px-16`}>
+            <m.main
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                initial={{ opacity: 0 }}
+                transition={{ duration: 0.75, ease: "easeOut" }} className={`relative flex max-xl:flex-col  xl:items-start min-h-[90svh] px-4 xl:px-16`}>
 
                 <div className="flex flex-1 max-xl:w-full flex-col items-start gap-4 py-9">
                     <div className="flex items-end justify-between w-full">
@@ -344,7 +349,7 @@ export default function Edit({ data, userData }) {
 
                 {!serverCookie ? <Unaccess /> : <></>}
 
-            </main>
+            </m.main>
         </>
     )
 }

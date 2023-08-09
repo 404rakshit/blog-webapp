@@ -9,13 +9,52 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const articles = await Article.find({}).populate("author", [
-      "name",
-      "username",
-      "profile",
-      "designation",
-      "company",
-    ]);
+    const { limit } = req.query;
+    const articles = await Article.find({})
+      .select({
+        title: 1,
+        permalink: 1,
+        description: 1,
+        cover: 1,
+        tags: 1,
+        author: 1,
+        createdAt: 1,
+      })
+      .limit(limit)
+      .populate("author", [
+        "name",
+        "username",
+        "profile",
+        "designation",
+        "company",
+      ]);
+    res.status(200).send(articles);
+  } catch (err) {
+    res.status(403).send(err);
+  }
+});
+
+router.get("/latest", async (req, res) => {
+  try {
+    const articles = await Article.find({})
+      .select({
+        title: 1,
+        permalink: 1,
+        description: 1,
+        cover: 1,
+        tags: 1,
+        author: 1,
+        createdAt: 1,
+      })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("author", [
+        "name",
+        "username",
+        "profile",
+        "designation",
+        "company",
+      ]);
     res.status(200).send(articles);
   } catch (err) {
     res.status(403).send(err);
@@ -41,8 +80,37 @@ router.get("/draft", verifyRefreshToken, async (req, res) => {
   try {
     let user = await User.findOne({ username: req.user.username });
     if (!user) throw { status: 404, message: "User doesn't exists" };
-    let draft = await Draft.find({ author: user._id });
+    let draft = await Draft.find({ author: user._id }).select({
+      title: 1,
+      cover: 1,
+      updateAt: 1,
+    });
     res.status(200).json({ draft: draft });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
+router.get("/liked", verifyRefreshToken, async (req, res) => {
+  try {
+    let user = await User.findOne({ username: req.user.username })
+      .populate({
+        path: "liked",
+        select: ["title", "cover", "permalink"],
+        populate: {
+          path: "author",
+          model: "user",
+          select: ["profile", "name", "username"],
+        },
+      })
+      .select({
+        _id: 0,
+        liked: 1,
+      });
+    // console.log(user?.liked);
+    res.status(200).json({ liked: user?.liked });
   } catch (err) {
     res
       .status(err.status || 500)
@@ -59,7 +127,7 @@ router.get("/:username/:articleLink", async (req, res) => {
     let article = await Article.findOne({
       permalink: encodeURIComponent(req.params.articleLink),
     })
-      .populate("author", ["name", "username", "profile"])
+      .populate("author", ["name", "username", "profile", "followers"])
       .populate({
         path: "comments",
         populate: {
@@ -211,23 +279,24 @@ router.post("/like/:id", verifyToken, async (req, res) => {
     if (!id) throw { status: 404, message: "Provide Id" };
     let user = await User.findOne({ username });
     if (!user) throw { status: 404, message: "User doesn't Exists" };
-    let article = await Article.find({
+    let article = await Article.findOne({
       _id: id,
       likes: { $eq: user.username },
     }).count();
     let response;
-    // if (!article) throw { status: 404, message: "Article doesn't Exists" };
-    // let data = await Article.findByIdAndUpdate(id, { $push: { likes: user._id } });
-    // let data2 = await User.findByIdAndUpdate(user._id, { $push: { liked: article._id } });
     article
-      ? (await Article.findByIdAndUpdate(id, { $pull: { likes: user.username } }),
+      ? (await Article.findByIdAndUpdate(id, {
+          $pull: { likes: user.username },
+        }),
         await User.findByIdAndUpdate(user._id, {
-          $pull: { liked: article._id },
+          $pull: { liked: new Types.ObjectId(id) },
         }),
         (response = "Unliked"))
-      : (await Article.findByIdAndUpdate(id, { $push: { likes: user.username } }),
+      : (await Article.findByIdAndUpdate(id, {
+          $push: { likes: user.username },
+        }),
         await User.findByIdAndUpdate(user._id, {
-          $push: { liked: article._id },
+          $push: { liked: new Types.ObjectId(id) },
         }),
         (response = "Liked"));
     res.status(200).json({ message: response, state: !article });

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const NotificationSchema = require("./notificationSchema");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
@@ -52,13 +53,13 @@ const userSchema = new Schema(
     },
     followers: [
       {
-        type: Schema.Types.ObjectId,
+        type: Schema.Types.String,
         ref: "user",
       },
     ],
     following: [
       {
-        type: Schema.Types.ObjectId,
+        type: Schema.Types.String,
         ref: "user",
       },
     ],
@@ -68,6 +69,7 @@ const userSchema = new Schema(
         max: 3,
       },
     ],
+    notifications: [NotificationSchema],
     draft: [
       {
         type: Schema.Types.ObjectId,
@@ -96,6 +98,11 @@ const userSchema = new Schema(
   },
   { versionKey: false, timestamps: true }
 );
+
+userSchema.virtual('followersCount').get(function(){
+  // console.log('Run the console')
+  return this.followers.length
+})
 
 const User = mongoose.model("user", userSchema);
 

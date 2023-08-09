@@ -3,6 +3,7 @@ import { popUp } from "@/components/Modal";
 import { Refesh } from "@/components/Refesh";
 import Unaccess from "@/components/Unaccess";
 import axios from "axios";
+import { motion as m} from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -92,7 +93,11 @@ export default function Draft({ data, userData }) {
                 <title>Drafted Articles</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </Head>
-            <main className={`relative flex flex-col min-h-[90svh] gap-3 px-4 xl:px-16 py-9`}>
+            <m.main
+                animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        initial={{ opacity: 0 }}
+                transition={{ duration: 0.75, ease: "easeOut" }} className={`relative flex flex-col min-h-[90svh] gap-3 px-4 xl:px-16 py-9`}>
                 <section className="flex flex-wrap justify-between w-full gap-5">
                     <span className={`${jose.className} flex gap-2 max-xl:items-start xl:text-3xl text-2xl`}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
@@ -114,7 +119,6 @@ export default function Draft({ data, userData }) {
                     {userData?.draft.map(e => {
                         let date = new Date(e?.updatedAt || "2012").toString().split(" ")
                         return (<span key={e._id} id={e._id} className="relative flex flex-col gap-3 p-1 bg-zinc-100 rounded-md overflow-hidden xl:max-w-sm max-xl:w-[48%]">
-
                             <div className="z-10 opacity-0 pointer-events-none flex flex-col gap-2 items-center justify-center absolute h-full w-full bg-slate-100 bg-opacity-40 backdrop-blur-[2px] transition-all duration-300">
                                 <span className="text-xl font-bold">Are you sure ?</span>
                                 <section className="flex gap-1">
@@ -158,7 +162,7 @@ export default function Draft({ data, userData }) {
 
                 {!serverCookie ? <Unaccess /> : <></>}
 
-            </main>
+            </m.main>
         </>
     )
 }

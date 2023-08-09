@@ -3,6 +3,7 @@ import { popUp } from "@/components/Modal";
 import { Refesh } from "@/components/Refesh";
 import { unrevel } from "@/components/UserLog";
 import axios from "axios";
+import { motion as m } from "framer-motion";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,11 +18,12 @@ export async function getServerSideProps({ params, req }) {
         props: {
             data,
             cookies: req.cookies,
+            user: params.user
         }
     }
 }
 
-export default function Articles({ data, cookies, }) {
+export default function Articles({ data, cookies, user }) {
     let clientCookie = cookies?.data
     let serverCookie = cookies?.parallelVortex
     if (clientCookie) clientCookie = JSON.parse(cookies?.data)
@@ -37,6 +39,7 @@ export default function Articles({ data, cookies, }) {
     const [comments, setComments] = useState(data?.comments || [])
     const [likes, setLikes] = useState(data?.likes?.length || 0)
     const [liked, setLiked] = useState(data?.likes?.includes(clientCookie?.username))
+    const [following, setFollowing] = useState(data?.author?.followers?.includes(clientCookie?.username))
 
     function commentIt(review, article) {
         document.getElementById("commentor").disabled = true
@@ -88,26 +91,62 @@ export default function Articles({ data, cookies, }) {
         })
     }
 
+    function follow() {
+        document.getElementById("follow").disabled = true
+
+        axios.request({
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${process.env.SERVER_URL}/user/follow/${user}`,
+            headers: {
+                'Authorization': `Bearer ${cookies?.parallel}`,
+            }
+        }).then(res => {
+            setFollowing(res.data?.state)
+            document.getElementById("follow").disabled = false
+        }).catch(err => {
+            popUp(err.message + " " + err.response.data.message)
+            document.getElementById("follow").disabled = false
+        })
+    }
+
     return data ? (
         <>
             <Head>
                 <title>{data.title} - Reader</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <meta name="description" content={data.description} />
+                <meta property="og:title" content={data.title} />
+                <meta property="og:description" content={data.description} />
+                <meta property="og:image" content={data.cover} />
+                <meta property="og:url" content={`/user/${user}/${data.parmalink}`} />
+                <meta property="og:type" content="article" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
             </Head>
-            <main className={`flex justify-center min-h-[90svh] px-4 xl:px-16`}>
+            <m.main
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                initial={{ opacity: 0 }}
+                transition={{ duration: 0.75, ease: "easeOut" }}
+                className={`flex justify-center min-h-[90svh] px-4 xl:px-16`}>
                 <div className="flex flex-1 max-xl:w-full max-w-3xl flex-col items-center gap-4 py-5">
                     <section className="flex flex-col py-2 gap-2 w-full">
-                        <span className="flex justify-between">
+                        <span className="flex justify-between overflow-hidden">
                             <h1 className={`${jose.className} text-4xl max-xl:text-3xl`}>{data?.title || ""}</h1>
                         </span>
 
                         <span className="flex w-full justify-between items-center">
                             <section className="flex items-center gap-2">
                                 <span className="relative h-12 w-12 overflow-hidden rounded-full bg-zinc-200">
-                                    <Image className="object-cover border-0" loader={() => data?.author.profile} src={data?.author.profile} fill />
+                                    <Link href={`/user/${user}`}>
+                                        <Image className="object-cover border-0" loader={() => data?.author.profile} src={data?.author.profile} fill />
+                                    </Link>
                                 </span>
                                 <section className="flex flex-col">
-                                    <span className={`${jose.className} text-lg flex gap-2`}>{data?.author.name} •<button className="text-blue-500 text-base">Follow</button></span>
+                                    <span className={`${jose.className} text-lg flex gap-2`}><Link href={`/user/${user}`}>{data?.author.name}</Link> <button onClick={() => {
+                                        follow()
+                                    }} id="follow" className={`${following ? "text-opacity-70 text-zinc-600" : "text-blue-500" } ${clientCookie?.username == user ? "hidden" : "block"} text-base disabled:cursor-pointer disabled:opacity-30`}>• {following ? "Following" : "Follow"}</button></span>
                                     <span className={`text-zinc-400 text-sm`} >{`${date[1]} ${date[2]}, ${date[3]}`}</span>
                                 </section>
                             </section>
@@ -180,7 +219,7 @@ export default function Articles({ data, cookies, }) {
 
                     </div>
                 </div>
-            </main>
+            </m.main>
         </>
     ) : (<>
         <Head>

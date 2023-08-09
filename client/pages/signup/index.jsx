@@ -101,8 +101,10 @@ export default function SignUp() {
 
               <span className="flex flex-col">
                 <label htmlFor="name" className={`${jose.className} text-lg translate-x-1`}>Name*</label>
-                <input id="name" onBlur={(e) => {
-                  if (e.target.value.length > 3) setName(e.target.value);
+                <input id="name" onKeyDown={(e)=>{
+                  if (!(e.keyCode > 64 && e.keyCode < 91)) e.preventDefault()
+                }} onBlur={(e) => {
+                  if (e.target.value.length > 2) setName(e.target.value);
                   else setName(null)
                 }} className={`${jose.className} text-xl leading-none outline-none py-3 max-xl:py-4 px-4 bg-zinc-100 rounded-md focus:border-black disabled:opacity-70 disabled:cursor-not-allowed bg-transparent w-[370px] max-w-[90svw]`} autoComplete="off" type="text" placeholder="Enter your name" required maxLength={20} />
               </span>
@@ -112,7 +114,7 @@ export default function SignUp() {
                 <span className="flex gap-2">
                   <input onBlur={(e) => {
                     e.target.value = e.target.value.replace(/\s/g, "").toLowerCase()
-                    if (e.target.value.length > 3) setUname(e.target.value)
+                    if (e.target.value.length > 2) setUname(e.target.value)
                     else setUname(null)
                     setTimeout(() => {
                       document.getElementById("unique").click()
@@ -306,7 +308,7 @@ export default function SignUp() {
                 maxAge: 30 * 24 * 60 * 60,
               })
               setTimeout(() => {
-                window.location.replace("/");
+                window.location.replace("/edit-profile");
               }, 2000);
             })
             .catch((error) => {
