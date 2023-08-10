@@ -23,6 +23,10 @@ exports.generateMailToken = (payload) => {
   return jwt.sign(payload, process.env.mailToken, { expiresIn: "60m" });
 };
 
+exports.generatePassToken = (payload) => {
+  return jwt.sign(payload, process.env.passToken, { expiresIn: "60m" });
+};
+
 exports.verifyToken = async (req, res, next) => {
   try {
     const autHeader = req.headers["authorization"];
@@ -73,7 +77,28 @@ exports.verifyMailToken = async (req, res, next) => {
       next();
     });
   } catch (err) {
-    if (err.token) await Token.deleteOne({ refreshToken: err.token });
+    if (err.token) await Token.deleteOne({ mailToken: err.token });
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+};
+
+exports.verifyPassToken = async (req, res, next) => {
+  try {
+    const { authorization } = req.headers;
+    const token = authorization?.split(" ")[1];
+    if (!token) throw { status: 404, message: "Provide Token!" };
+    if (!(await Token.countDocuments({ passToken: token })))
+      throw { status: 404, message: "Token Not Found" };
+
+    jwt.verify(token, process.env.passToken, (err, user) => {
+      if (err) throw { status: 403, message: "Token Expired!", token };
+      req.user = user;
+      next();
+    });
+  } catch (err) {
+    if (err.token) await Token.deleteOne({ passToken: err.token });
     res
       .status(err.status || 500)
       .json({ message: err.message || "Internal Error" });

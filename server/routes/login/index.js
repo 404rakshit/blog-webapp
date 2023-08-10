@@ -5,10 +5,13 @@ const {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
+  generatePassToken,
+  verifyPassToken,
 } = require("../../middlewares/jwt");
 const User = require("../../models/user");
-const { checkPassword } = require("../../middlewares/bcrypt");
+const { checkPassword, createPassword } = require("../../middlewares/bcrypt");
 const Token = require("../../models/token");
+const { sendMail } = require("./mailer");
 
 router.get("/", (req, res) => {
   res.json({ msg: "Login Sucessfully" });
@@ -22,8 +25,8 @@ router.post("/", async (req, res) => {
       throw { status: 404, message: "Misiing Cridentials" };
     // console.log(username,password)
     let user = await User.findOne({ username });
-    if (!user) user = await User.findOne({email: username});
-    if (!user) throw { status: 404, message: "User doesn't exisits" }
+    if (!user) user = await User.findOne({ email: username });
+    if (!user) throw { status: 404, message: "User doesn't exisits" };
     // console.log(user);
     if (!checkPassword(password, user?.password))
       throw { status: 403, message: "Wrong Password!" };
@@ -124,16 +127,85 @@ router.get("/verify", verifyToken, (req, res) => {
       throw { status: 403, message: "Unauthorized" };
     res.status(200).json("Verified");
   } catch (err) {
-    res.status(err.status || 500).json(err.message);
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
   }
 });
 
-router.post("/check", (req, res) => {
+// router.post("/check", (req, res) => {
+//   try {
+//     // if(!req.session.access) throw {status: 404, message: "Token Not Found!"}
+//     res.status(200).json({ session: req.sessionID });
+//   } catch (err) {
+//     res.status(err.status || 500).json(err.message);
+//   }
+// });
+
+router.post("/password", async (req, res) => {
   try {
-    // if(!req.session.access) throw {status: 404, message: "Token Not Found!"}
-    res.status(200).json({ session: req.sessionID });
+    const { username } = req.query;
+    if (!username)
+      throw { status: 404, message: "Provide Required Credentials!" };
+    let user = await User.findOne({ username });
+    if (!user) user = await User.findOne({ email: username });
+    if (!user) throw { status: 404, message: "User doesn't exists" };
+    let token = await Token.findOne({ username: user.username }).select({
+      updatedAt: 1,
+    });
+
+    if (token) {
+      let diff = Math.floor(
+        ((Date.now() - new Date(token?.updatedAt)) / 1000 / 60) << 0
+      );
+      if (diff < 5)
+        throw { status: 401, message: `Try Again in ${5 - diff} minutes` };
+      else {
+        token.passToken = generatePassToken({ username: user.username });
+      }
+    } else {
+      token = new Token({
+        passToken: generatePassToken({ username: user.username }),
+        username: user.username,
+      });
+    }
+    let mailResponse = await sendMail(user.email, token.passToken);
+    let data = await token.save();
+    res.status(201).json({
+      message: `Verification Mail Sent to ${mailResponse.accepted[0]}`,
+    });
   } catch (err) {
-    res.status(err.status || 500).json(err.message);
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
+router.get("/password", verifyPassToken, async (req, res) => {
+  try {
+    const { username } = req.user;
+    res.status(200).json({ username });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
+router.put("/password", verifyPassToken, async (req, res) => {
+  try {
+    const { username } = req.user;
+    const { pass } = req.body;
+    let user = await User.findOne({ username });
+    if (!user) throw { status: 404, message: "User doesn't exists" };
+    user.password = createPassword(pass);
+    await user.save();
+    await Token.deleteOne({ username });
+    res.status(201).json({ message: "Password Changed!"})
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
   }
 });
 

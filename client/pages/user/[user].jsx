@@ -1,9 +1,11 @@
 import ArticleCard from "@/components/ArticleCard"
 import { jose, oswald } from "@/components/Fonts"
 import { Refesh } from "@/components/Refesh"
+import axios from "axios"
 import { motion as m } from "framer-motion"
 import Head from "next/head"
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export async function getServerSideProps({ params, req }) {
@@ -14,20 +16,40 @@ export async function getServerSideProps({ params, req }) {
         props: {
             data,
             cookies: req.cookies,
+            user: params.user
         }
     }
 }
 
-export default function User({ data, cookies }) {
+export default function User({ data, cookies, user }) {
     let clientCookie = cookies?.data
     let serverCookie = cookies?.parallelVortex
     if (clientCookie) clientCookie = JSON.parse(cookies?.data)
 
     Refesh(cookies?.parallelVortex, cookies?.parallel)
 
-    useEffect(()=>{
-        console.log(data);
-    },[])
+    const [following, setFollowing] = useState(data?.followers?.includes(clientCookie?.username))
+    const [followers, setFollowers] = useState(data?.followers?.length || 0)
+
+    function follow() {
+        document.getElementById("follow").disabled = true
+
+        axios.request({
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: `${process.env.SERVER_URL}/user/follow/${user}`,
+            headers: {
+                'Authorization': `Bearer ${cookies?.parallel}`,
+            }
+        }).then(res => {
+            setFollowing(res.data?.state)
+            res.data?.state ? setFollowers(followers + 1) : setFollowers(followers - 1)
+            document.getElementById("follow").disabled = false
+        }).catch(err => {
+            popUp(err.message + " " + err.response.data.message)
+            document.getElementById("follow").disabled = false
+        })
+    }
 
     let date = new Date(data.createdAt).toString().split(" ")
     return (
@@ -71,18 +93,17 @@ export default function User({ data, cookies }) {
                         </svg>{data.designation}</>} {data.company && <><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                         </svg>{data.company}</>}</span>
-                        <span className={`xl:text-lg font-bold`}>{data?.followers?.length || 0} Followers</span>
-                        <button onClick={(e) => {
-                            e.target.classList.remove("text-white")
-                            e.target.classList.replace("bg-zinc-800", "border")
-                            e.target.innerText = "Following"
-                        }} className={`${jose.className} leading-7 rounded-full py-1 pt-2 px-5 my-2 text-xl text-white bg-zinc-800 w-fit border-zinc-800`}>Follow</button>
+                        <span className={`xl:text-lg font-bold`}>{followers} Followers</span>
+                        <button onClick={() => {
+                            follow()
+                        }} id="follow" className={`${jose.className} leading-7 rounded-full py-1 pt-2 px-5 my-2 text-lg ${following ? "border" : "bg-zinc-800 text-white"} ${clientCookie?.username == user ? "hidden" : "block"} w-fit disabled:opacity-50 disabled:cursor-not-allowed border-zinc-800`}>{following ? "Following" : "Follow"}</button>
+                        <Link href={"/dashboard"} className={`${jose.className} leading-7 rounded-full py-1 pt-2 px-5 my-2 text-lg bg-zinc-800 text-white ${clientCookie?.username == user ? "block" : "hidden"} w-fit disabled:opacity-50 disabled:cursor-not-allowed border-zinc-800`}>Dashboard</Link>
                     </div>
                     <div className="flex-1 xl:px-10 flex flex-col gap-2">
                         <span className={`${jose.className} text-2xl xl:text-3xl font-medium flex gap-2 `}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>About</span>
-                        {data?.about ? <p className="text-zinc-600">{data.about}</p> : <div className="h-20 w-full grid place-items-center"><span className="px-3 py-1 rounded-md bg-zinc-200 font-semibold text-zinc-400 text-sm">Nothing Mentioned About</span></div> }
+                        {data?.about ? <p className="text-zinc-600">{data.about}</p> : <div className="h-20 w-full grid place-items-center"><span className="px-3 py-1 rounded-md bg-zinc-200 font-semibold text-zinc-400 text-sm">Nothing Mentioned About</span></div>}
                         <span className={`${jose.className} leading-8 xl:text-lg text-zinc-500 font-light flex gap-2`}>Joined on {date[1] + " " + date[2]}</span>
                     </div>
                 </div>

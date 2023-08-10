@@ -32,14 +32,17 @@ export default function Articles({ data, cookies, user }) {
 
     useEffect(() => {
         if (data) document.getElementById("container").innerHTML = data?.body.join("")
+        setUrl(window.location.href)
     }, [])
 
     let date = new Date(data?.createdAt || "2012").toString().split(" ")
 
+    const [title, setTitle] = useState(data?.title)
     const [comments, setComments] = useState(data?.comments || [])
     const [likes, setLikes] = useState(data?.likes?.length || 0)
     const [liked, setLiked] = useState(data?.likes?.includes(clientCookie?.username))
     const [following, setFollowing] = useState(data?.author?.followers?.includes(clientCookie?.username))
+    const [url, setUrl] = useState(null)
 
     function commentIt(review, article) {
         document.getElementById("commentor").disabled = true
@@ -113,7 +116,7 @@ export default function Articles({ data, cookies, user }) {
     return data ? (
         <>
             <Head>
-                <title>{data.title} - Reader</title>
+                <title>{title}- Reader</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <meta name="description" content={data.description} />
                 <meta property="og:title" content={data.title} />
@@ -146,7 +149,7 @@ export default function Articles({ data, cookies, user }) {
                                 <section className="flex flex-col">
                                     <span className={`${jose.className} text-lg flex gap-2`}><Link href={`/user/${user}`}>{data?.author.name}</Link> <button onClick={() => {
                                         follow()
-                                    }} id="follow" className={`${following ? "text-opacity-70 text-zinc-600" : "text-blue-500" } ${clientCookie?.username == user ? "hidden" : "block"} text-base disabled:cursor-pointer disabled:opacity-30`}>• {following ? "Following" : "Follow"}</button></span>
+                                    }} id="follow" className={`${following ? "text-opacity-70 text-zinc-600" : "text-blue-500"} ${clientCookie?.username == user ? "hidden" : "block"} text-base disabled:cursor-pointer disabled:opacity-30`}>• {following ? "Following" : "Follow"}</button></span>
                                     <span className={`text-zinc-400 text-sm`} >{`${date[1]} ${date[2]}, ${date[3]}`}</span>
                                 </section>
                             </section>
@@ -171,12 +174,9 @@ export default function Articles({ data, cookies, user }) {
                             </button>
                             <span className={`${jose.className} leading-none text-zinc-500`}>{likes}</span>
                         </form>
-                        <span className="flex gap-2 items-center">
-                            <button>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 xl:hover:scale-110 transition-all duration-300 cursor-pointer stroke-zinc-700">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                                </svg>
-                            </button>
+                        <span className="flex gap-3 items-center">
+                            <Link target="_blank" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Read an article on " + title + " only on Reader")}&url=${encodeURIComponent(url)}`}><img src="/twitter.svg" class="h-6 w-6 opacity-50 " /></Link>
+                            <Link target="_blank" href={`http://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}`}><img src="/linkedin.svg" class="h-6 w-6 opacity-50 -translate-y-1" /></Link>
                         </span>
                     </div>
                     <div id="container" className={`${poppins.className} flex flex-col w-full gap-3 px-2 outline-none`}>

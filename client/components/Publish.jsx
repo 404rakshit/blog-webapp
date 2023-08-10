@@ -17,8 +17,8 @@ export function success(title, link, cover, des) {
     </section>
     </a>
     <section class="flex gap-2 items-start text-xl">Share: 
-    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img src="/twitter.svg" class="h-5 w-5 opacity-50 max-xl:translate-y-1" /></a>
-    <a href="#" class="rounded-full px-2 py-1 border border-zinc-500"><img src="/linkedin.svg" class="h-5 w-5 opacity-50 xl:-translate-y-1" /></a>`
+    <a target="_blank" href="https://twitter.com/intent/tweet?text=${encodeURIComponent("Read an article on " + title + " only on Reader")}&url=${encodeURIComponent(window.location.origin + "/" + link)}" class="px-2 py-1"><img src="/twitter.svg" class="h-5 w-5 opacity-50 max-xl:translate-y-1" /></a>
+    <a target="_blank" href="http://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.origin + "/" + link)}" class="px-2 py-1"><img src="/linkedin.svg" class="h-5 w-5 opacity-50 xl:-translate-y-1" /></a></section>`
 }
 
 export default function Publish() {

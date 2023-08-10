@@ -249,12 +249,16 @@ export default function Dashboard({ data, userData }) {
                             return (<div key={e.username} id={e.username} className="mx-1 rounded-md bg-zinc-200/70 p-2 flex items-center justify-between">
                                 <section className="flex items-center gap-2">
                                     <span className="h-12 w-12 bg-slate-200 relative rounded-full overflow-hidden">
-                                        <Image className="object-cover" loader={() => e.profile} src={e.profile} fill />
+                                        <Link href={`/user/${e.username}`}>
+                                            <Image className="object-cover" loader={() => e.profile} src={e.profile} fill />
+                                        </Link>
                                     </span>
-                                    <section className="flex flex-col">
-                                        <span className={`${jose.className} opacity-40 text-sm`}>{e.username}</span>
-                                        <span className={`${jose.className}`}>{e.name}</span>
-                                    </section>
+                                    <Link href={`/user/${e.username}`}>
+                                        <section className="flex flex-col">
+                                            <span className={`${jose.className} opacity-40 text-sm`}>{e.username}</span>
+                                            <span className={`${jose.className}`}>{e.name}</span>
+                                        </section>
+                                    </Link>
                                 </section>
                                 <button className="text-zinc-700 text-sm">Follow</button>
                             </div>)
