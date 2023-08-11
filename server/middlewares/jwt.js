@@ -50,7 +50,7 @@ exports.verifyRefreshToken = async (req, res, next) => {
     if (!token) throw { status: 401, message: "Token Missing" };
     if (!(await Token.countDocuments({ refreshToken: token })))
       throw { status: 404, message: "Token Not Found" };
-    
+
     jwt.verify(token, process.env.refreshToken, (err, user) => {
       if (err) throw { status: 403, message: "Token Expired!", token };
       req.user = user;
@@ -99,6 +99,22 @@ exports.verifyPassToken = async (req, res, next) => {
     });
   } catch (err) {
     if (err.token) await Token.deleteOne({ passToken: err.token });
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+};
+
+exports.verifyGoogleToken = async (req, res, next) => {
+  try {
+    const { authorization } = req.headers;
+    const token = authorization?.split(" ")[1];
+    if (!token) throw { status: 404, message: "Provide Token!" };
+
+    req.user = jwt.decode(token);
+    next();
+
+  } catch (err) {
     res
       .status(err.status || 500)
       .json({ message: err.message || "Internal Error" });

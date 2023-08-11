@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
     let user = await User.findOne({ username });
     if (!user) user = await User.findOne({ email: username });
     if (!user) throw { status: 404, message: "User doesn't exisits" };
-    // console.log(user);
+    if (user?.googleVerified) throw { status: 403, message: "User belong to Google" };
     if (!checkPassword(password, user?.password))
       throw { status: 403, message: "Wrong Password!" };
     const token = new Token({
@@ -150,6 +150,7 @@ router.post("/password", async (req, res) => {
     let user = await User.findOne({ username });
     if (!user) user = await User.findOne({ email: username });
     if (!user) throw { status: 404, message: "User doesn't exists" };
+    if (user?.googleVerified) throw { status: 403, message: "No Password" };
     let token = await Token.findOne({ username: user.username }).select({
       updatedAt: 1,
     });

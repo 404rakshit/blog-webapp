@@ -243,15 +243,15 @@ export default function Edit({ data, userData }) {
 
                             e.target.disabled = true
                             let body = new FormData()
-                            body.append('name', name ? name : null)
-                            body.append('company', company ? company : null)
-                            body.append('designation', designation ? designation : null)
-                            body.append('about', about ? about : null);
+                            body.append('name', name ? name : "")
+                            body.append('company', company ? company : "")
+                            body.append('designation', designation ? designation : "")
+                            body.append('about', about ? about : "");
                             body.append('cover', cover ? cover : null);
                             body.append('profile', file ? file : null)
-                            body.append('twitter', document.getElementById('twitter').value || null)
-                            body.append('linkedin', document.getElementById('linkedin').value || null)
-                            body.append('insta', document.getElementById('insta').value || null)
+                            body.append('twitter', document.getElementById('twitter').value || "")
+                            body.append('linkedin', document.getElementById('linkedin').value || "")
+                            body.append('insta', document.getElementById('insta').value || "")
 
                             // console.log(body);
 

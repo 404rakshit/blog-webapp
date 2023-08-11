@@ -122,7 +122,7 @@ export default function Home({ data, people, cookies, latestData }) {
 
             {latestData ? latestData.map(e => {
               let date = new Date(e?.createdAt || "2012").toString().split(" ")
-              return (<Link href={`/user/${e?.author.username}/${e.permalink}`}><div className="lg:hover:-translate-y-0.5 transition-all duration-200 flex gap-2 lg:max-w-sm ">
+              return (<Link key={e._id} href={`/user/${e?.author.username}/${e.permalink}`}><div className="lg:hover:-translate-y-0.5 transition-all duration-200 flex gap-2 lg:max-w-sm ">
                 <div className="relative shrink-0 shadow-md w-36 h-36 rounded-md overflow-hidden bg-zinc-100">
                   <Image className="object-cover flex-1" loader={() => e?.cover} src={e?.cover} fill />
                 </div>

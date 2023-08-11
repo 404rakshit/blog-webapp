@@ -30,7 +30,6 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
       validate: {
         validator: (password) => password.length > 7,
         message: "{VALUE} is too short to be a password",
@@ -95,6 +94,10 @@ const userSchema = new Schema(
         unique: true,
       },
     ],
+    googleVerified: {
+      type: Boolean,
+      default: false
+    }
   },
   { versionKey: false, timestamps: true }
 );

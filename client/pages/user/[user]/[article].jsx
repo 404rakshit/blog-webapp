@@ -95,6 +95,7 @@ export default function Articles({ data, cookies, user }) {
     }
 
     function follow() {
+        if (!clientCookie) return unrevel()
         document.getElementById("follow").disabled = true
 
         axios.request({

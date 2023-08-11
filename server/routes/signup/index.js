@@ -6,6 +6,7 @@ const {
   generateRefreshToken,
   generateMailToken,
   verifyMailToken,
+  verifyGoogleToken,
 } = require("../../middlewares/jwt");
 const User = require("../../models/user");
 const Token = require("../../models/token");
@@ -60,9 +61,6 @@ router.post(
         refreshToken: generateRefreshToken({ username: user.username }),
       });
       await token.save();
-      // req.session.access = generateAccessToken({ username: user.username });
-      // req.session.refesh = token.refreshToken;
-      // req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
       res.cookie("parallelVortex", token.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
@@ -83,10 +81,62 @@ router.post(
         profile,
       });
     } catch (err) {
-      res.status(500).send(err);
+      res
+        .status(err.status || 500)
+        .json({ message: err.message || "Internal Error" });
     }
   }
 );
+
+router.post("/google", verifyGoogleToken, async (req, res) => {
+  try {
+    const { name, email, email_verified, picture } = req.user;
+    let user = await User.findOne({ email });
+    let newUser = false;
+    if (user)
+      if (!user?.googleVerified)
+        throw { status: 401, message: "Not Google Verified" };
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        username: email.split("@")[0],
+        profile: picture,
+        googleVerified: email_verified,
+      });
+      newUser = true;
+      await user.save();
+    }
+    const token = new Token({
+      refreshToken: generateRefreshToken({ username: user.username }),
+    });
+    await token.save();
+    res.cookie("parallelVortex", token.refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.cookie("parallel", generateAccessToken({ username: user.username }), {
+      maxAge: 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.status(201).json({
+      message: "Logged In",
+      name,
+      username: user.username,
+      email,
+      profile: user.profile,
+      newUser,
+    });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json(err.message || { message: "Internal Sever Error" });
+  }
+});
 
 // router.post("/mail", sendTestMail);
 router.post("/mail", async (req, res) => {

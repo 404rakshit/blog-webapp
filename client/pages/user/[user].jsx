@@ -1,6 +1,7 @@
 import ArticleCard from "@/components/ArticleCard"
 import { jose, oswald } from "@/components/Fonts"
 import { Refesh } from "@/components/Refesh"
+import { unrevel } from "@/components/UserLog"
 import axios from "axios"
 import { motion as m } from "framer-motion"
 import Head from "next/head"
@@ -32,6 +33,7 @@ export default function User({ data, cookies, user }) {
     const [followers, setFollowers] = useState(data?.followers?.length || 0)
 
     function follow() {
+        if (!clientCookie) return unrevel()
         document.getElementById("follow").disabled = true
 
         axios.request({

@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { unrevel } from "./UserLog";
 import { useCookies } from "react-cookie";
 import { publishModal } from "./Publish";
+import axios from "axios";
 
 export default function Header() {
     const [profile, setProfile] = useState(false)
@@ -17,6 +18,46 @@ export default function Header() {
 
     useEffect(() => {
         setProfile(cookie.data?.profile)
+
+        if (!profile) {
+            <script src="https://accounts.google.com/gsi/client" async defer></script>
+            function handleCallbackResponse(res) {
+                if (!res.credential) return null
+
+                axios.request({
+                    method: 'post',
+                    maxBodyLength: Infinity,
+                    url: `${process.env.SERVER_URL}/signup/google`,
+                    withCredentials: true,
+                    headers: {
+                        'Authorization': `Bearer ${res.credential}`,
+                    }
+                }).then(res => {
+                    popUp(res.data.message)
+                    setCookie("data", JSON.stringify({
+                        name: res?.data?.name,
+                        username: res?.data?.username,
+                        email: res?.data?.email,
+                        profile: res?.data?.profile
+                    }), {
+                        maxAge: 30 * 24 * 60 * 60
+                    })
+                    res.data?.newUser ? window.location.replace("/edit-profile") : router.reload()
+                }).catch(err => {
+                    popUp(err.message + " " + err.response.data)
+                })
+            }
+
+            google.accounts.id.initialize({
+                client_id: "386385378142-cq81jn3fdusrb18ufk0hpg87eovna8v7.apps.googleusercontent.com",
+                callback: handleCallbackResponse
+            })
+
+            google.accounts.id.renderButton(
+                document.getElementById("signInDiv"),
+                { type: "icon", size: 'medium', theme: "filled_black", shape: "circle" }
+            )
+        }
     }, [])
 
     function sidebar() {
@@ -60,11 +101,14 @@ export default function Header() {
                         </svg>Logout</Link>
                     </div>
                 </span> :
-                    <svg onClick={() => {
-                        unrevel()
-                    }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-9 h-9 transition-all duration-200 cursor-pointer lg:hover:scale-110">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>}
+
+                    <><div id="signInDiv"></div>
+
+                        <svg onClick={() => {
+                            unrevel()
+                        }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-9 h-9 transition-all duration-200 cursor-pointer lg:hover:scale-110">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg></>}
 
                 <Link href={"/write-new"} className="flex max-xl:hidden items-center gap-1 px-4 pb-1 pt-2 transition-all duration-200 border group xl:hover:border-zinc-500 border-zinc-300 rounded-xl">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 transition-all duration-200 stroke-zinc-500 xl:group-hover:stroke-zinc-700 -translate-y-0.5">
