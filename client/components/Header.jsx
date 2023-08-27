@@ -8,6 +8,7 @@ import { unrevel } from "./UserLog";
 import { useCookies } from "react-cookie";
 import { publishModal } from "./Publish";
 import axios from "axios";
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Header() {
   const [profile, setProfile] = useState(false)
@@ -22,44 +23,6 @@ export default function Header() {
     setProfile(cookie.data?.profile)
 
     if (!profile) {
-      function handleCallbackResponse(res) {
-        if (!res.credential) return null
-
-        axios.request({
-          method: 'post',
-          maxBodyLength: Infinity,
-          url: `${process.env.SERVER_URL}/signup/google`,
-          withCredentials: true,
-          headers: {
-            'Authorization': `Bearer ${res.credential}`,
-          }
-        }).then(res => {
-          popUp(res.data.message)
-          setCookie("data", JSON.stringify({
-            name: res?.data?.name,
-            username: res?.data?.username,
-            email: res?.data?.email,
-            profile: res?.data?.profile
-          }), {
-            maxAge: 30 * 24 * 60 * 60
-          })
-          res.data?.newUser ? window.location.replace("/edit-profile") : router.reload()
-        }).catch(err => {
-          popUp(err.message + " " + err.response.data)
-        })
-      }
-
-      if (google) {
-        google.accounts.id.initialize({
-          client_id: process.env.CLIENT_ID,
-          callback: handleCallbackResponse
-        })
-
-        google.accounts.id.renderButton(
-          document.getElementById("signInDiv"),
-          { type: "icon", size: 'medium', theme: "filled_black", shape: "circle" }
-        )
-      }
 
       if (cookie.data?.username) axios.request({
         method: 'get',
@@ -74,6 +37,33 @@ export default function Header() {
 
   function sidebar() {
     setHide(!hide)
+  }
+
+  function handleCallbackResponse(res) {
+    if (!res.credential) return null
+
+    axios.request({
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${process.env.SERVER_URL}/signup/google`,
+      withCredentials: true,
+      headers: {
+        'Authorization': `Bearer ${res.credential}`,
+      }
+    }).then(res => {
+      popUp(res.data.message)
+      setCookie("data", JSON.stringify({
+        name: res?.data?.name,
+        username: res?.data?.username,
+        email: res?.data?.email,
+        profile: res?.data?.profile
+      }), {
+        maxAge: 30 * 24 * 60 * 60
+      })
+      res.data?.newUser ? window.location.replace("/edit-profile") : router.reload()
+    }).catch(err => {
+      popUp(err.message + " " + err.response.data)
+    })
   }
 
   return (<>
@@ -92,7 +82,7 @@ export default function Header() {
           if (!cookie.data?.username) return null
           if (document.getElementById("title") && document.getElementById("edit")) publishModal()
         }} className={`${jose.className} flex items-center gap-1 px-4 pt-2 py-1 transition-all duration-200 border group bg-zinc-800 xl:bg-zinc-900 text-white border-zinc-300 rounded-xl`}>Publish</button>
-      </section> : <section className="flex items-center gap-5">
+      </section> : <section className="flex items-center gap-4">
         <span className="relative">
           <svg onClick={(e) => {
             if (!profile) return 0;
@@ -104,8 +94,8 @@ export default function Header() {
           <div id="notify" className="w-80 h-0 transition-all duration-200 select-none overflow-hidden bg-white absolute -translate-x-36 top-12 -left-1/2 shadow-md ">
             {notifications.map(e => {
               let date = new Date(e?.createdAt || "2012").toString().split(" ")
-              if (e.notificationType == "follow") {
-                return <Link href={`user/${e.user.username}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
+              if (e?.notificationType == "follow") {
+                return <Link href={`/user/${e.user.username}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
                   <span className="p-2 bg-lime-50 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 stroke-lime-500">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -117,8 +107,8 @@ export default function Header() {
                   </section>
                 </Link>
               }
-              if (e.notificationType == "liked") {
-                return <Link href={`user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
+              if (e?.notificationType == "liked") {
+                return <Link href={`/user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
                   <span className="p-2 bg-red-50 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 stroke-red-500">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -131,8 +121,8 @@ export default function Header() {
                 </Link>
               }
 
-              if (e.notificationType == "comment") {
-                return <Link href={`user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
+              if (e?.notificationType == "comment") {
+                return <Link href={`/user/${cookie.data?.username}/${e.article.permalink}`} className="p-3 border-b flex items-center gap-2 lg:hover:bg-zinc-50 transition-all duration-200" onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }}>
                   <span className="p-2 bg-purple-50 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 stroke-purple-500">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
@@ -146,7 +136,7 @@ export default function Header() {
               }
 
             })}
-            <Link onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }} href={"/notifications"} className="text-xs font-semibold py-0.5 text-zinc-400 my-2 flex justify-center">See More</Link>
+            {notifications[1] ? <Link onClick={() => { document.getElementById("notify").classList.replace("h-auto", "h-0") }} href={"/notifications"} className="text-xs font-semibold py-0.5 text-zinc-400 my-2 flex justify-center">See More</Link> : <></>}
           </div>
         </span>
 
@@ -163,7 +153,12 @@ export default function Header() {
           </div>
         </span> :
 
-          <><div id="signInDiv"></div>
+          <>            <GoogleLogin type="icon" size='medium' theme="filled_black" shape="circle"
+              onSuccess={handleCallbackResponse}
+              onError={() => {
+                console.log('Login Failed');
+              }}
+            />
 
             <svg onClick={() => {
               unrevel()
