@@ -60,10 +60,8 @@ export default function Home({ data, people, cookies, latestData }) {
 
             <section className="flex flex-wrap justify-around items-center gap-3 max-xl:w-full">
               {/* <label className={`${jose.className} text-zinc-500`}>My topics:</label> */}
-              <span className="rounded-full bg-zinc-100 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-200 text-zinc-600 font-medium">Design</span>
-              <span className="rounded-full bg-zinc-100 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-200 text-zinc-600 font-medium">Development</span>
-              <span className="rounded-full bg-zinc-100 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-200 text-zinc-600 font-medium">UX</span>
-              <span className="rounded-full bg-zinc-100 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 xl:hover:bg-zinc-200 text-zinc-600 font-medium">Marketing</span>
+              <Link href={"/articles"} className="max-xl:flex-1 text-center rounded-full bg-zinc-800 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 text-white xl:hover:bg-zinc-900  font-medium">New Articles</Link>
+              <Link href={"/user"} className="max-xl:flex-1 text-center rounded-full bg-zinc-800 px-5 py-3 text-xs max-xl:text-sm transition-all cursor-pointer duration-300 text-white xl:hover:bg-zinc-900  font-medium">New Users</Link>
             </section>
 
           </div>
@@ -134,12 +132,6 @@ export default function Home({ data, people, cookies, latestData }) {
                 </section>
               </div></Link>)
             }) : <></>}
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <label className={`${jose.className} text-2xl my-2`}>My reading list</label>
-
-            { }
           </div>
 
         </div>

@@ -5,6 +5,7 @@ const { verifyToken, verifyRefreshToken } = require("../../middlewares/jwt");
 const Comment = require("../../models/comment");
 const { Types } = require("mongoose");
 const Draft = require("../../models/draft");
+const { notify } = require("../../middlewares/notify");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -21,6 +22,34 @@ router.get("/", async (req, res) => {
         createdAt: 1,
       })
       .limit(limit)
+      .populate("author", [
+        "name",
+        "username",
+        "profile",
+        "designation",
+        "company",
+      ]);
+    res.status(200).send(articles);
+  } catch (err) {
+    res.status(403).send(err);
+  }
+});
+
+router.get("/new", async (req, res) => {
+  try {
+    const articles = await Article.find({})
+      .select({
+        title: 1,
+        permalink: 1,
+        description: 1,
+        cover: 1,
+        tags: 1,
+        author: 1,
+        createdAt: 1,
+      })
+      .sort({
+        createdAt: -1,
+      })
       .populate("author", [
         "name",
         "username",
@@ -83,7 +112,7 @@ router.get("/draft", verifyRefreshToken, async (req, res) => {
     let draft = await Draft.find({ author: user._id }).select({
       title: 1,
       cover: 1,
-      updateAt: 1,
+      createdAt: 1,
     });
     res.status(200).json({ draft: draft });
   } catch (err) {
@@ -95,7 +124,8 @@ router.get("/draft", verifyRefreshToken, async (req, res) => {
 
 router.get("/liked", verifyRefreshToken, async (req, res) => {
   try {
-    let user = await User.findOne({ username: req.user.username })
+    const { username } = req.user;
+    let user = await User.findOne({ username })
       .populate({
         path: "liked",
         select: ["title", "cover", "permalink"],
@@ -120,11 +150,10 @@ router.get("/liked", verifyRefreshToken, async (req, res) => {
 
 router.get("/:username/:articleLink", async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username }).populate(
-      "articles"
-    );
+    const user = await User.findOne({ username: req.params.username })
     if (!user) throw { status: 404, message: "User doesn't exists" };
     let article = await Article.findOne({
+      author: new Types.ObjectId(user._id),
       permalink: encodeURIComponent(req.params.articleLink),
     })
       .populate("author", ["name", "username", "profile", "followers"])
@@ -298,6 +327,7 @@ router.post("/like/:id", verifyToken, async (req, res) => {
         await User.findByIdAndUpdate(user._id, {
           $push: { liked: new Types.ObjectId(id) },
         }),
+        notify(username, null, "liked", id),
         (response = "Liked"));
     res.status(200).json({ message: response, state: !article });
   } catch (err) {
@@ -325,6 +355,7 @@ router.post("/comment", verifyToken, async (req, res) => {
     await User.findByIdAndUpdate(user._id, {
       $push: { comments: newComment._id },
     });
+    notify(user.username, null, "comment", article)
     let data = await newComment.save();
     let response = {
       createdAt: data.createdAt,

@@ -3,7 +3,7 @@ import { unrevel } from "./UserLog";
 
 export default function Unaccess() {
     return (
-        <div className="fixed flex flex-col items-center justify-center gap-2 bg-white bg-opacity-40 backdrop-blur-md min-h-[95svh] w-full max-w-[2000px]">
+        <div className="fixed flex flex-col items-center justify-center gap-2 max-xl:-translate-x-4 xl:-translate-x-16 -translate-y-9 bg-white bg-opacity-40 backdrop-blur-md min-h-screen w-full max-w-[2000px]">
             <span className={`${jose.className} font-semibold text-2xl`}>You are not logged in</span>
             <button onClick={() => {
                 unrevel()

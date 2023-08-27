@@ -1,4 +1,4 @@
-import { Josefin_Sans, Montserrat, Oswald, Poppins } from 'next/font/google'
+import { Josefin_Sans, Montserrat, Oswald, Press_Start_2P } from 'next/font/google'
 
 export const oswald = Oswald({
     subsets: ['latin'],
@@ -21,5 +21,11 @@ export const poppins = Montserrat({
 export const jose = Josefin_Sans({
     subsets: ['latin'],
     weight: ['400', '700'],
+    display: 'block',
+})
+
+export const p2p = Press_Start_2P({
+    subsets: ['greek'],
+    weight: ['400'],
     display: 'block',
 })

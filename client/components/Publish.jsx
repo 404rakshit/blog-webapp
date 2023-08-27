@@ -41,7 +41,7 @@ export default function Publish() {
                     <label className={`${jose.className} text-xl leading-none`}>Tags: </label>
                     <input id="tags" onKeyUp={(e) => {
                         if (e.keyCode < 65 && e.keyCode > 90) e.isDefaultPrevented()
-                    }} onPaste={(e) => e.preventDefault()} className={`${jose.className} border-b border-zinc-400 px-1`} type="text" placeholder="e.g. UI, UX, Web" maxLength={70} />
+                    }} onPaste={(e) => e.preventDefault()} className={`${jose.className} border-b border-zinc-400 px-1`} type="text" placeholder="e.g. UI, UX, Web" maxLength={40} />
                 </div>
                 {/* <label className={`${jose.className} text-zinc-400`}>Comma Seperated </label> */}
                 <ol className={`${jose.className} grid list-disc`}>

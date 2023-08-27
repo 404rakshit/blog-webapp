@@ -117,7 +117,7 @@ export default function Draft({ data, userData }) {
 
                 <div className="flex gap-3 py-3 flex-wrap">
                     {userData?.draft.map(e => {
-                        let date = new Date(e?.updatedAt || "2012").toString().split(" ")
+                        let date = new Date(e?.createdAt || "2012").toString().split(" ")
                         return (<span key={e._id} id={e._id} className="relative flex flex-col gap-3 p-1 bg-zinc-100 rounded-md overflow-hidden xl:max-w-sm max-xl:w-[48%]">
                             <div className="z-10 opacity-0 pointer-events-none flex flex-col gap-2 items-center justify-center absolute h-full w-full bg-slate-100 bg-opacity-40 backdrop-blur-[2px] transition-all duration-300">
                                 <span className="text-xl font-bold">Are you sure ?</span>

@@ -9,6 +9,8 @@ const {
   formReader,
   uploadBufferImg,
 } = require("../../middlewares/imageUpload");
+const { Types } = require("mongoose");
+const { notify } = require("../../middlewares/notify");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -17,6 +19,20 @@ router.get("/", async (req, res) => {
     const users = limit
       ? await User.find().sort({ createdAt: 1 }).limit(limit)
       : await User.find();
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(404).send(err);
+  }
+});
+
+router.get("/new", async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 }).select({
+      username: 1,
+      name: 1,
+      profile: 1,
+      createdAt: 1,
+    });
     res.status(200).send(users);
   } catch (err) {
     res.status(404).send(err);
@@ -134,7 +150,7 @@ router.get("/followers", verifyToken, async (req, res) => {
     let user = await User.findOne({ username });
     if (!user) throw { status: 404, message: "User doesn't Exists" };
     let followers = await User.find({
-      username: { $in: user.followers.slice(0, 10) },
+      username: { $in: user.followers },
     }).select({
       _id: 0,
       name: 1,
@@ -155,7 +171,7 @@ router.get("/following", verifyToken, async (req, res) => {
     let user = await User.findOne({ username });
     if (!user) throw { status: 404, message: "User doesn't Exists" };
     let following = await User.find({
-      username: { $in: user.following.slice(0, 10) },
+      username: { $in: user.following },
     }).select({
       _id: 0,
       name: 1,
@@ -164,6 +180,95 @@ router.get("/following", verifyToken, async (req, res) => {
     });
     // console.log(following);
     res.status(200).json({ message: "OK", following });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
+router.get("/comments", verifyToken, async (req, res) => {
+  try {
+    const { username } = req.user;
+    let user = await User.findOne({ username });
+    if (!user) throw { status: 404, message: "User doesn't Exists" };
+    let comments = await User.find({
+      username: { $in: user.comments },
+    })
+      .select({
+        _id: 0,
+        comments: 1,
+      })
+      .populate("comments", ["_id", "review"]);
+    // console.log(following);
+    res.status(200).json({ message: "OK", comments });
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
+router.get("/notifications", verifyRefreshToken, async (req, res) => {
+  try {
+    const { username } = req.user;
+    if (!username) throw { status: 404, message: "Provide User" };
+    let user = await User.findOne({ username })
+      .select({
+        notifications: 1,
+      })
+      .populate({
+        path: "notifications",
+        populate: {
+          path: "user",
+          model: "user",
+          select: "name username -_id",
+        },
+      })
+      .populate({
+        path: "notifications",
+        populate: {
+          path: "article",
+          model: "article",
+          select: "title permalink -_id",
+        },
+      });
+    if (!user) throw { status: 404, message: "User doesn't Exists" };
+    res.status(200).json(user.notifications.reverse());
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ message: err.message || "Internal Error" });
+  }
+});
+
+router.get("/notifications/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (!username) throw { status: 404, message: "Provide User" };
+    let user = await User.findOne({ username })
+      .select({
+        notifications: 1,
+      })
+      .populate({
+        path: "notifications",
+        populate: {
+          path: "user",
+          model: "user",
+          select: "name username -_id",
+        },
+      })
+      .populate({
+        path: "notifications",
+        populate: {
+          path: "article",
+          model: "article",
+          select: "title permalink -_id",
+        },
+      });
+    if (!user) throw { status: 404, message: "User doesn't Exists" };
+    let notifications = user.notifications.reverse()
+    res.status(200).json([notifications[0], notifications[1]]);
   } catch (err) {
     res
       .status(err.status || 500)
@@ -211,12 +316,9 @@ router.post("/follow/:id", verifyToken, async (req, res) => {
     if (!id) throw { status: 404, message: "Provide Id" };
     let user = await User.findOne({ username });
     if (!user) throw { status: 404, message: "User doesn't Exists" };
-    // console.log(user);
-    // console.log(id);
     let following = await User.findOne({ username })
       .all("following", [id])
       .countDocuments();
-    // console.log(Boolean(following));
     let response;
     following
       ? (await User.findByIdAndUpdate(user._id, {
@@ -238,6 +340,7 @@ router.post("/follow/:id", verifyToken, async (req, res) => {
             $push: { followers: username },
           }
         ),
+        notify(username, id, "follow"),
         (response = "Follow"));
     res.status(200).json({ message: response, state: !following });
   } catch (err) {

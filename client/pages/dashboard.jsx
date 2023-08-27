@@ -238,7 +238,7 @@ export default function Dashboard({ data, userData }) {
                 {/* Banner Model */}
                 <div id="banner" className="fixed flex flex-col items-center justify-center gap-2 bg-white bg-opacity-20 min-h-[95svh] w-full max-w-[2000px] transit duration-200 opacity-0 pointer-events-none xl:-translate-x-16 -translate-x-4">
                     <div className="flex flex-col gap-1 rounded-md bg-white w-72 xl:h-96 h-60 shadow-md border -translate-y-8 overflow-auto">
-                        <section className={`${jose.className} flex text-lg border-b justify-between p-3 shadow`}>Followers <svg onClick={(e) => {
+                        <section className={`${jose.className} flex text-lg border-b justify-between p-3 shadow`}>Info<svg onClick={(e) => {
                             e.currentTarget.parentElement.parentElement.parentElement.classList.replace("opacity-100", "opacity-0")
                             e.currentTarget.parentElement.parentElement.parentElement.classList.add("pointer-events-none")
                         }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="xl:hover:scale-105 w-6 h-6 transition-transform cursor-pointer">
@@ -260,7 +260,6 @@ export default function Dashboard({ data, userData }) {
                                         </section>
                                     </Link>
                                 </section>
-                                <button className="text-zinc-700 text-sm">Follow</button>
                             </div>)
                         }) : <svg className="m-auto" width="32px" height="32px" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" color="#000000"><defs><linearGradient x1="8.042%" y1="0%" x2="65.682%" y2="23.865%" id="tail-spin_svg__a_15"><stop stopColor="currentColor" stopOpacity="0" offset="0%"></stop><stop stopColor="currentColor" stopOpacity=".631" offset="63.146%"></stop><stop stopColor="currentColor" offset="100%"></stop></linearGradient></defs><g transform="translate(1 1)" fill="none" fillRule="evenodd"><path d="M36 18c0-9.94-8.06-18-18-18" stroke="url(#tail-spin_svg__a_15)" strokeWidth="2"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s" repeatCount="indefinite"></animateTransform></path><circle fill="#fff" cx="36" cy="18" r="1"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="0.9s" repeatCount="indefinite"></animateTransform></circle></g></svg>}
 

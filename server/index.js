@@ -10,13 +10,21 @@ const PORT = process.env.PORT || 8080;
 
 app.use(
   cors({
-    origin: ["http://localhost:3000","http://192.168.122.125:3000"],
+    origin: ["http://localhost:3000", "http://192.168.122.125:3000"],
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
     exposedHeaders: ["set-cookie"],
     // allowedHeaders: true,
   })
 );
+
+// app.use((req, res, next) => {
+//   // console.log(req.get('origin'))
+//   let userIP = req.socket.remoteAddress;
+//   console.log(userIP)
+//   next();
+// });
+
 app.use(cookieParser());
 
 const userRoute = require("./routes/user");

@@ -3,6 +3,7 @@ import { jose, oswald } from "@/components/Fonts"
 import { Refesh } from "@/components/Refesh"
 import { unrevel } from "@/components/UserLog"
 import axios from "axios"
+import BadWordsFilter from "bad-words"
 import { motion as m } from "framer-motion"
 import Head from "next/head"
 import Image from "next/image"
@@ -31,6 +32,9 @@ export default function User({ data, cookies, user }) {
 
     const [following, setFollowing] = useState(data?.followers?.includes(clientCookie?.username))
     const [followers, setFollowers] = useState(data?.followers?.length || 0)
+
+    const filter = new BadWordsFilter();
+    filter.addWords("gay")
 
     function follow() {
         if (!clientCookie) return unrevel()
@@ -105,7 +109,7 @@ export default function User({ data, cookies, user }) {
                         <span className={`${jose.className} text-2xl xl:text-3xl font-medium flex gap-2 `}><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                         </svg>About</span>
-                        {data?.about ? <p className="text-zinc-600">{data.about}</p> : <div className="h-20 w-full grid place-items-center"><span className="px-3 py-1 rounded-md bg-zinc-200 font-semibold text-zinc-400 text-sm">Nothing Mentioned About</span></div>}
+                        {data?.about ? <p className="text-zinc-600">{filter.clean(data.about)}</p> : <div className="h-20 w-full grid place-items-center"><span className="px-3 py-1 rounded-md bg-zinc-200 font-semibold text-zinc-400 text-sm">Nothing Mentioned About</span></div>}
                         <span className={`${jose.className} leading-8 xl:text-lg text-zinc-500 font-light flex gap-2`}>Joined on {date[1] + " " + date[2]}</span>
                     </div>
                 </div>
