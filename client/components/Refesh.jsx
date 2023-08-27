@@ -8,7 +8,7 @@ export function Refesh(parallelVortex, parallel) {
             let config = {
                 method: 'get',
                 maxBodyLength: Infinity,
-                url: 'http://localhost:8080/user/refresh',
+                url: `${process.env.SERVER_URL}/user/refresh`,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${parallelVortex}`
