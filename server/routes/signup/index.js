@@ -61,24 +61,14 @@ router.post(
         refreshToken: generateRefreshToken({ username: user.username }),
       });
       await token.save();
-      res.cookie("parallelVortex", token.refreshToken, {
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      });
-      res.cookie("parallel", generateAccessToken({ username: user.username }), {
-        maxAge: 60 * 60 * 1000,
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      });
       res.status(201).json({
         message: "New User Created Successfully",
         name,
         username,
         email: req.user?.email,
         profile,
+        parallel: generateAccessToken({ username: user.username }),
+        parallelVortex: token.refreshToken,
       });
     } catch (err) {
       res
@@ -111,18 +101,6 @@ router.post("/google", verifyGoogleToken, async (req, res) => {
       refreshToken: generateRefreshToken({ username: user.username }),
     });
     await token.save();
-    res.cookie("parallelVortex", token.refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-    res.cookie("parallel", generateAccessToken({ username: user.username }), {
-      maxAge: 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
     res.status(201).json({
       message: "Logged In",
       name,
@@ -130,6 +108,8 @@ router.post("/google", verifyGoogleToken, async (req, res) => {
       email,
       profile: user.profile,
       newUser,
+      parallelVortex: token.refreshToken,
+      parallel: generateAccessToken({ username: user.username }),
     });
   } catch (err) {
     res

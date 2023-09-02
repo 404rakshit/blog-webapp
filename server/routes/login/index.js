@@ -34,24 +34,14 @@ router.post("/", async (req, res) => {
       refreshToken: generateRefreshToken({ username: user.username }),
     });
     await token.save();
-    res.cookie("parallelVortex", token.refreshToken, {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-    res.cookie("parallel", generateAccessToken({ username: user.username }), {
-      maxAge: 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
     res.status(200).json({
       message: "Login Successfully",
       name: user?.name,
       username: user?.username,
       email: user?.email,
       profile: user?.profile,
+      parallelVortex: token.refreshToken,
+      parallel: generateAccessToken({ username: user.username }),
     });
   } catch (err) {
     res

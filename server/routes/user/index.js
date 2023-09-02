@@ -126,17 +126,7 @@ router.put("/", formReader.any(), verifyToken, async (req, res) => {
 
 router.get("/refresh", verifyRefreshToken, (req, res) => {
   try {
-    res.cookie(
-      "parallel",
-      generateAccessToken({ username: req.user.username }),
-      {
-        maxAge: 60 * 60 * 1000,
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      }
-    );
-    res.status(201).json({ message: "Verified and Generated" });
+    res.status(201).json({parallel: generateAccessToken({ username: req.user.username })})
   } catch (err) {
     res
       .status(err.status || 500)

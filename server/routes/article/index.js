@@ -37,6 +37,9 @@ router.get("/", async (req, res) => {
 
 router.get("/new", async (req, res) => {
   try {
+    const { page } = req.query;
+    let skipNum = +page * 6;
+    const count = Math.ceil((await Article.countDocuments()) / 6);
     const articles = await Article.find({})
       .select({
         title: 1,
@@ -50,6 +53,8 @@ router.get("/new", async (req, res) => {
       .sort({
         createdAt: -1,
       })
+      .skip(skipNum)
+      .limit(6)
       .populate("author", [
         "name",
         "username",
@@ -57,7 +62,7 @@ router.get("/new", async (req, res) => {
         "designation",
         "company",
       ]);
-    res.status(200).send(articles);
+    res.status(200).json({ articles, count });
   } catch (err) {
     res.status(403).send(err);
   }
@@ -150,7 +155,7 @@ router.get("/liked", verifyRefreshToken, async (req, res) => {
 
 router.get("/:username/:articleLink", async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username })
+    const user = await User.findOne({ username: req.params.username });
     if (!user) throw { status: 404, message: "User doesn't exists" };
     let article = await Article.findOne({
       author: new Types.ObjectId(user._id),
@@ -355,7 +360,7 @@ router.post("/comment", verifyToken, async (req, res) => {
     await User.findByIdAndUpdate(user._id, {
       $push: { comments: newComment._id },
     });
-    notify(user.username, null, "comment", article)
+    notify(user.username, null, "comment", article);
     let data = await newComment.save();
     let response = {
       createdAt: data.createdAt,
