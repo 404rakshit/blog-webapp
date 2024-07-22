@@ -2,6 +2,8 @@
 
 Welcome to our Fullstack Blog Web Application! This dynamic web app is designed to provide a robust platform for bloggers and readers alike. It's built using the MERN stack (MongoDB, Express, Next.js(React), Node.js) and offers a range of features including authentication with JWT tokens, server-side rendering, Manual Mail Authentication Configuration (Also OAuth) and CRUD (Create, Read, Update, Delete) actions.
 
+![Homepage](https://github.com/user-attachments/assets/55c31b85-0186-4e9f-95c2-2557a8cb3a10)
+
 ## Deployment
 
 - **Frontend Deployed** on [Vercel](https://blog-app-client-ivory.vercel.app/)
@@ -96,6 +98,15 @@ Follow these steps to set up and run the application locally:
 - **Reading Posts:** Anyone can read and comment on posts.
 - **Review Functionality:** Users can like and comment for specific posts even follow a perticular person.
 - **Responsive Design:** The app is optimized for mobile and desktop use.
+
+## UI
+![User Blog](https://github.com/user-attachments/assets/e852d85b-879f-4488-baf5-79ccb1448b01)
+![Write blog](https://github.com/user-attachments/assets/50d830ad-1dff-430a-b4c2-d9d937e00384)
+![Login](https://github.com/user-attachments/assets/65292c81-4965-40c4-a0b5-daccc276d5ae)
+![Articles](https://github.com/user-attachments/assets/c1b00723-3866-4c1c-91d7-89b12dbf1456)
+![User Profile](https://github.com/user-attachments/assets/c6b4c830-6f2d-4aa1-9efb-3aa1d94fa71f)
+![Dashboard](https://github.com/user-attachments/assets/982fe6ae-52ab-4719-b352-9b95e16f609e)
+
 
 ## Acknowledgments
 
